@@ -190,9 +190,11 @@ export default function Home() {
 
       <div className="grid md:grid-cols-2 gap-6 mb-8">
         {/* Getting Started */}
-        <div className="bg-white/20 backdrop-blur-sm rounded-xl p-6 shadow-lg">
+        <div className="geomi-gradient-card rounded-xl p-6 shadow-lg">
           <div className="flex items-center gap-3 mb-4">
-            <Users className="text-blue-400" size={24} />
+            <div className="w-8 h-8 bg-blue-400 rounded-full flex items-center justify-center">
+              <Users className="text-blue-900" size={20} />
+            </div>
             <h2 className="text-xl font-bold text-white">Getting Started</h2>
           </div>
           <div className="space-y-3 text-white/90">
@@ -218,9 +220,11 @@ export default function Home() {
         </div>
 
         {/* Voting Rules */}
-        <div className="bg-white/20 backdrop-blur-sm rounded-xl p-6 shadow-lg">
+        <div className="geomi-gradient-card rounded-xl p-6 shadow-lg">
           <div className="flex items-center gap-3 mb-4">
-            <Vote className="text-purple-400" size={24} />
+            <div className="w-8 h-8 bg-purple-400 rounded-full flex items-center justify-center">
+              <Vote className="text-purple-900" size={20} />
+            </div>
             <h2 className="text-xl font-bold text-white">Voting Rules</h2>
           </div>
           <div className="space-y-3 text-white/90">
@@ -246,9 +250,11 @@ export default function Home() {
         </div>
 
         {/* How to Suggest Names */}
-        <div className="bg-white/20 backdrop-blur-sm rounded-xl p-6 shadow-lg">
+        <div className="geomi-gradient-card rounded-xl p-6 shadow-lg">
           <div className="flex items-center gap-3 mb-4">
-            <Plus className="text-green-400" size={24} />
+            <div className="w-8 h-8 bg-green-400 rounded-full flex items-center justify-center">
+              <Plus className="text-green-900" size={20} />
+            </div>
             <h2 className="text-xl font-bold text-white">Suggesting Names</h2>
           </div>
           <div className="space-y-3 text-white/90">
@@ -268,9 +274,11 @@ export default function Home() {
         </div>
 
         {/* Vote Packs */}
-        <div className="bg-white/20 backdrop-blur-sm rounded-xl p-6 shadow-lg">
+        <div className="geomi-gradient-card rounded-xl p-6 shadow-lg">
           <div className="flex items-center gap-3 mb-4">
-            <Coins className="text-yellow-400" size={24} />
+            <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
+              <Coins className="text-yellow-900" size={20} />
+            </div>
             <h2 className="text-xl font-bold text-white">Vote Packs</h2>
           </div>
           <div className="space-y-2 text-white/90 text-sm">
@@ -295,10 +303,12 @@ export default function Home() {
       </div>
 
       {/* Prize Pool Section */}
-      <div className="bg-gradient-to-r from-green-400/20 to-blue-400/20 backdrop-blur-sm rounded-xl p-6 shadow-lg mb-8">
+      <div className="geomi-gradient-card rounded-xl p-6 shadow-lg mb-8">
         <div className="text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <Trophy className="text-yellow-400" size={32} />
+            <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center">
+              <Trophy className="text-yellow-900" size={28} />
+            </div>
             <h2 className="text-2xl font-bold text-white">Prize Pool System</h2>
           </div>
           <div className="grid md:grid-cols-3 gap-4 text-white/90">
@@ -320,9 +330,11 @@ export default function Home() {
       </div>
 
       {/* Strategy Tips */}
-      <div className="bg-white/20 backdrop-blur-sm rounded-xl p-6 shadow-lg">
+      <div className="geomi-gradient-card rounded-xl p-6 shadow-lg">
         <div className="flex items-center gap-3 mb-4">
-          <Info className="text-cyan-400" size={24} />
+          <div className="w-8 h-8 bg-cyan-400 rounded-full flex items-center justify-center">
+            <Info className="text-cyan-900" size={20} />
+          </div>
           <h2 className="text-xl font-bold text-white">Strategy Tips</h2>
         </div>
         <div className="grid md:grid-cols-2 gap-4 text-white/90">
@@ -349,62 +361,29 @@ export default function Home() {
     </div>
   );
 
-  if (!connected) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-500 via-pink-500 to-red-500 p-4 flex items-center justify-center">
-        <div className="bg-white/20 backdrop-blur-sm rounded-xl p-8 max-w-md w-full shadow-lg text-center">
-          <div className="text-6xl mb-4">🎭</div>
-          <h1 className="text-3xl font-bold text-white mb-4">Name Our Mascot!</h1>
-          <p className="text-white/90 mb-6">Connect your Aptos wallet to participate in voting</p>
-          <WalletConnection />
-        </div>
-      </div>
-    );
-  }
-
-  if (!isRegistered) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-500 via-pink-500 to-red-500 p-4 flex items-center justify-center">
-        <div className="bg-white/20 backdrop-blur-sm rounded-xl p-8 max-w-md w-full shadow-lg text-center">
-          <div className="text-6xl mb-4">🎭</div>
-          <h1 className="text-3xl font-bold text-white mb-4">Welcome!</h1>
-          <p className="text-white/90 mb-6">Register to get your free vote and start participating</p>
-          <button
-            onClick={handleRegister}
-            disabled={isRegistering}
-            className="w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-yellow-900 font-bold py-3 px-6 rounded-lg hover:from-yellow-300 hover:to-orange-300 transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50"
-          >
-            {isRegistering ? 'Registering...' : 'Register & Get Free Vote'}
-          </button>
-          <div className="mt-4">
-            <WalletConnection />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-500 via-pink-500 to-red-500 p-4">
+    <div className="min-h-screen geomi-gradient p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center py-6">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <Sparkles className="text-yellow-300 animate-pulse" size={32} />
-            <h1 className="text-4xl font-bold text-white bg-gradient-to-r from-yellow-300 to-pink-300 bg-clip-text text-transparent">
+          <div className="inline-flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center float-animation">
+              <Sparkles className="text-orange-500" size={24} />
+            </div>
+            <h1 className="text-5xl font-bold geomi-title">
               Name Our Mascot! "Geomi"
             </h1>
           </div>
           
           {/* Tab Navigation */}
-          <div className="flex justify-center mb-6">
-            <div className="bg-white/20 backdrop-blur-sm rounded-xl p-1 flex gap-1">
+          <div className="flex justify-center mb-8">
+            <div className="geomi-gradient-card rounded-2xl p-2 flex gap-2">
               <button
                 onClick={() => setActiveTab('voting')}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                className={`flex items-center gap-2 px-8 py-4 rounded-xl font-semibold transition-all ${
                   activeTab === 'voting'
-                    ? 'bg-white/30 text-white shadow-lg'
-                    : 'text-white/70 hover:text-white hover:bg-white/10'
+                    ? 'geomi-btn-primary text-white'
+                    : 'text-white/80 hover:text-white hover:bg-white/10'
                 }`}
               >
                 <Heart size={20} />
@@ -412,10 +391,10 @@ export default function Home() {
               </button>
               <button
                 onClick={() => setActiveTab('instructions')}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                className={`flex items-center gap-2 px-8 py-4 rounded-xl font-semibold transition-all ${
                   activeTab === 'instructions'
-                    ? 'bg-white/30 text-white shadow-lg'
-                    : 'text-white/70 hover:text-white hover:bg-white/10'
+                    ? 'geomi-btn-secondary text-white'
+                    : 'text-white/80 hover:text-white hover:bg-white/10'
                 }`}
               >
                 <BookOpen size={20} />
@@ -424,30 +403,40 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Wallet & Status Info - Only show on voting tab */}
+          {/* Wallet & Status Info - Show on voting tab */}
           {activeTab === 'voting' && (
             <>
               <p className="text-white/90 text-lg mb-4">
                 Help us choose the perfect name for our Geomi mascot! Use your votes wisely - the winner takes the prize pool!
               </p>
               
+              {/* Connection Status */}
               <div className="flex flex-wrap justify-center gap-4 mb-4">
                 <WalletConnection />
-                <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
-                  <span className="text-white/90 text-sm">Balance: </span>
-                  <span className="text-white font-bold">{accountBalance.toFixed(2)} APT</span>
-                </div>
-                {userAccount && (
+                
+                {connected && account ? (
                   <>
-                    <div className="bg-blue-500/30 rounded-lg px-4 py-2">
-                      <span className="text-white/90 text-sm">Free Votes: </span>
-                      <span className="text-white font-bold">{userAccount.freeVotesRemaining}</span>
+                    <div className="geomi-gradient-card rounded-xl px-4 py-2">
+                      <span className="text-white/90 text-sm">Balance: </span>
+                      <span className="text-white font-bold">{accountBalance.toFixed(2)} APT</span>
                     </div>
-                    <div className="bg-pink-500/30 rounded-lg px-4 py-2">
-                      <span className="text-white/90 text-sm">Paid Votes: </span>
-                      <span className="text-white font-bold">{userAccount.paidVotesOwned}</span>
-                    </div>
+                    {userAccount && (
+                      <>
+                        <div className="bg-blue-500/20 backdrop-blur-sm border border-blue-300/30 rounded-xl px-4 py-2">
+                          <span className="text-white/90 text-sm">Free Votes: </span>
+                          <span className="text-white font-bold">{userAccount.freeVotesRemaining}</span>
+                        </div>
+                        <div className="bg-pink-500/20 backdrop-blur-sm border border-pink-300/30 rounded-xl px-4 py-2">
+                          <span className="text-white/90 text-sm">Paid Votes: </span>
+                          <span className="text-white font-bold">{userAccount.paidVotesOwned}</span>
+                        </div>
+                      </>
+                    )}
                   </>
+                ) : (
+                  <div className="bg-orange-500/20 backdrop-blur-sm border border-orange-300/30 rounded-xl px-4 py-2">
+                    <span className="text-white/90 text-sm">⚠️ Connect wallet to participate in voting</span>
+                  </div>
                 )}
               </div>
 
@@ -459,13 +448,15 @@ export default function Home() {
               )}
 
               {/* Prize Pool */}
-              <div className="bg-gradient-to-r from-green-400/20 to-blue-400/20 backdrop-blur-sm rounded-lg p-4 max-w-2xl mx-auto">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Trophy className="text-yellow-400" size={24} />
-                  <h2 className="text-xl font-bold text-white">Prize Pool</h2>
+              <div className="geomi-gradient-card rounded-2xl p-6 max-w-2xl mx-auto pulse-glow">
+                <div className="flex items-center justify-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center">
+                    <Trophy className="text-yellow-900" size={24} />
+                  </div>
+                  <h2 className="text-2xl font-bold text-white">Prize Pool</h2>
                 </div>
-                <p className="text-3xl font-bold text-white">{prizePool.total.toFixed(2)} APT</p>
-                <p className="text-white/70">{prizePool.contributors} contributors</p>
+                <p className="text-4xl font-bold text-white mb-2">{prizePool.total.toFixed(2)} APT</p>
+                <p className="text-white/80 text-lg">{prizePool.contributors} contributors</p>
               </div>
             </>
           )}
@@ -475,14 +466,33 @@ export default function Home() {
         {activeTab === 'instructions' ? (
           <InstructionsTab />
         ) : (
-          // Voting Tab Content (existing content)
+          // Voting Tab Content
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Name Suggestion Form */}
-            <div className="bg-white/20 backdrop-blur-sm rounded-xl p-6 shadow-lg">
-              <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
-                <Plus size={24} />
+            <div className="geomi-gradient-card rounded-2xl p-6 shadow-xl">
+              <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                <div className="w-8 h-8 bg-green-400 rounded-full flex items-center justify-center">
+                  <Plus className="text-green-900" size={20} />
+                </div>
                 Suggest a Name
               </h2>
+              
+              {/* Registration prompt for non-registered users */}
+              {connected && !isRegistered && (
+                <div className="mb-4 p-3 bg-blue-500/20 rounded-lg">
+                  <p className="text-white/90 text-sm mb-2">
+                    Register to get your free vote and suggest names!
+                  </p>
+                  <button
+                    onClick={handleRegister}
+                    disabled={isRegistering}
+                    className="w-full geomi-btn-secondary disabled:opacity-50"
+                  >
+                    {isRegistering ? 'Registering...' : 'Register & Get Free Vote'}
+                  </button>
+                </div>
+              )}
+              
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-white/90 mb-2 font-medium">
@@ -492,17 +502,20 @@ export default function Home() {
                     type="text"
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
-                    placeholder="Enter a creative name..."
-                    className="w-full px-4 py-2 rounded-lg bg-white/90 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all"
+                    placeholder={connected ? "Enter a creative name..." : "Connect wallet to suggest names"}
+                    className="w-full px-4 py-2 rounded-lg bg-white/90 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all disabled:opacity-50"
+                    disabled={!connected || !isRegistered}
                     required
                   />
                 </div>
                 <button
                   type="submit"
-                  disabled={isSubmitting || !newName.trim() || !userAccount?.freeVotesRemaining}
-                  className="w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-yellow-900 font-bold py-3 px-6 rounded-lg hover:from-yellow-300 hover:to-orange-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95"
+                  disabled={!connected || !isRegistered || isSubmitting || !newName.trim() || !userAccount?.freeVotesRemaining}
+                  className="w-full geomi-btn-primary disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95"
                 >
-                  {isSubmitting ? 'Submitting...' : 
+                  {!connected ? 'Connect Wallet to Suggest' :
+                   !isRegistered ? 'Register First' :
+                   isSubmitting ? 'Submitting...' : 
                    !userAccount?.freeVotesRemaining ? 'No Free Votes Left' :
                    'Submit Name (Uses Free Vote)'}
                 </button>
@@ -511,24 +524,32 @@ export default function Home() {
               {/* Buy Votes Button */}
               <button
                 onClick={() => setShowVoteStore(true)}
-                className="w-full mt-4 bg-gradient-to-r from-green-400 to-blue-400 text-white font-bold py-3 px-6 rounded-lg hover:from-green-300 hover:to-blue-300 transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
+                disabled={!connected || !isRegistered}
+                className="w-full mt-6 geomi-btn-secondary disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
               >
                 <DollarSign size={20} />
-                Buy More Votes
+                {!connected ? 'Connect Wallet to Buy Votes' : 'Buy More Votes'}
               </button>
             </div>
 
             {/* Voting Section */}
-            <div className="lg:col-span-2 bg-white/20 backdrop-blur-sm rounded-xl p-6 shadow-lg">
-              <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
-                <Heart size={24} />
+            <div className="lg:col-span-2 geomi-gradient-card rounded-2xl p-6 shadow-xl">
+              <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                <div className="w-8 h-8 bg-pink-400 rounded-full flex items-center justify-center">
+                  <Heart className="text-pink-900" size={20} />
+                </div>
                 Vote for Your Favorite
               </h2>
               
               {/* Voting Rules Info */}
-              <div className="mb-4 p-3 bg-blue-500/20 rounded-lg">
-                <h3 className="font-bold text-white text-sm mb-2">🗳️ Voting Rules:</h3>
-                <ul className="text-white/90 text-xs space-y-1">
+              <div className="mb-6 p-4 bg-blue-500/15 backdrop-blur-sm border border-blue-300/20 rounded-xl">
+                <h3 className="font-bold text-white text-sm mb-3 flex items-center gap-2">
+                  <div className="w-5 h-5 bg-blue-400 rounded-full flex items-center justify-center">
+                    <span className="text-blue-900 text-xs">🗳️</span>
+                  </div>
+                  Voting Rules:
+                </h3>
+                <ul className="text-white/90 text-sm space-y-2">
                   <li>• Vote for as many names as you like</li>
                   <li>• One FREE vote per name maximum</li>
                   <li>• Multiple PAID votes allowed per name</li>
@@ -537,65 +558,80 @@ export default function Home() {
               </div>
               
               <div className="space-y-3 max-h-96 overflow-y-auto">
-                {sortedSuggestions.map((suggestion, index) => (
-                  <div
-                    key={suggestion.id}
-                    className={`bg-white/30 rounded-lg p-4 transition-all hover:bg-white/40 ${
-                      index === 0 ? 'ring-2 ring-yellow-400' : ''
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          {index === 0 && <Trophy className="text-yellow-400" size={16} />}
-                          <h3 className="font-bold text-white text-lg">
-                            {suggestion.name}
-                          </h3>
+                {sortedSuggestions.length > 0 ? (
+                  sortedSuggestions.map((suggestion, index) => (
+                    <div
+                      key={suggestion.id}
+                      className={`geomi-gradient-card p-5 transition-all hover:bg-white/30 ${
+                        index === 0 ? 'ring-2 ring-yellow-400 pulse-glow' : ''
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            {index === 0 && <Trophy className="text-yellow-400" size={16} />}
+                            <h3 className="font-bold text-white text-lg">
+                              {suggestion.name}
+                            </h3>
+                          </div>
+                          <p className="text-white/70 text-sm">
+                            by {suggestion.submittedBy.slice(0, 6)}...{suggestion.submittedBy.slice(-4)}
+                          </p>
+                          <div className="text-white/60 text-xs mt-1">
+                            Free: {suggestion.freeVotes} | Paid: {suggestion.paidVotes}
+                          </div>
                         </div>
-                        <p className="text-white/70 text-sm">
-                          by {suggestion.submittedBy.slice(0, 6)}...{suggestion.submittedBy.slice(-4)}
-                        </p>
-                        <div className="text-white/60 text-xs mt-1">
-                          Free: {suggestion.freeVotes} | Paid: {suggestion.paidVotes}
-                        </div>
-                      </div>
-                      <div className="text-center space-y-2">
-                        <div className="text-2xl font-bold text-white">
-                          {suggestion.totalVotes}
-                        </div>
-                        <div className="flex gap-2">
-                          {/* Free Vote Button */}
-                          <button
-                            onClick={() => handleVote(suggestion.id, false)}
-                            disabled={userAccount?.freeVotedNames.includes(suggestion.id) || !userAccount?.freeVotesRemaining}
-                            className={`flex items-center gap-1 px-3 py-1 rounded-lg font-medium transition-all text-sm ${
-                              userAccount?.freeVotedNames.includes(suggestion.id) || !userAccount?.freeVotesRemaining
-                                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                                : 'bg-gradient-to-r from-blue-400 to-purple-400 text-white hover:from-blue-300 hover:to-purple-300 transform hover:scale-105'
-                            }`}
-                          >
-                            <Star size={12} />
-                            {userAccount?.freeVotedNames.includes(suggestion.id) ? 'Used' : 'Free'}
-                          </button>
-                          
-                          {/* Paid Vote Button */}
-                          <button
-                            onClick={() => handleVote(suggestion.id, true)}
-                            disabled={!userAccount?.paidVotesOwned}
-                            className={`flex items-center gap-1 px-3 py-1 rounded-lg font-medium transition-all text-sm ${
-                              !userAccount?.paidVotesOwned
-                                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                                : 'bg-gradient-to-r from-pink-400 to-red-400 text-white hover:from-pink-300 hover:to-red-300 transform hover:scale-105'
-                            }`}
-                          >
-                            <Crown size={12} />
-                            Paid
-                          </button>
+                        <div className="text-center space-y-2">
+                          <div className="text-2xl font-bold text-white">
+                            {suggestion.totalVotes}
+                          </div>
+                          <div className="flex gap-2">
+                            {/* Free Vote Button */}
+                            <button
+                              onClick={() => handleVote(suggestion.id, false)}
+                              disabled={!connected || !isRegistered || userAccount?.freeVotedNames.includes(suggestion.id) || !userAccount?.freeVotesRemaining}
+                              className={`flex items-center gap-1 px-4 py-2 rounded-xl font-semibold transition-all text-sm ${
+                                !connected || !isRegistered
+                                  ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                                  : userAccount?.freeVotedNames.includes(suggestion.id) || !userAccount?.freeVotesRemaining
+                                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                                  : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-400 hover:to-blue-500 transform hover:scale-105 shadow-lg'
+                              }`}
+                              title={!connected ? 'Connect wallet to vote' : !isRegistered ? 'Register to vote' : ''}
+                            >
+                              <Star size={14} />
+                              {!connected ? 'Free' : 
+                               !isRegistered ? 'Free' :
+                               userAccount?.freeVotedNames.includes(suggestion.id) ? 'Used' : 'Free'}
+                            </button>
+                            
+                            {/* Paid Vote Button */}
+                            <button
+                              onClick={() => handleVote(suggestion.id, true)}
+                              disabled={!connected || !isRegistered || !userAccount?.paidVotesOwned}
+                              className={`flex items-center gap-1 px-4 py-2 rounded-xl font-semibold transition-all text-sm ${
+                                !connected || !isRegistered || !userAccount?.paidVotesOwned
+                                  ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                                  : 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-400 hover:to-red-400 transform hover:scale-105 shadow-lg'
+                              }`}
+                              title={!connected ? 'Connect wallet to vote' : !isRegistered ? 'Register to vote' : !userAccount?.paidVotesOwned ? 'Buy vote packs to use paid votes' : ''}
+                            >
+                              <Crown size={14} />
+                              Paid
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="text-white/60 mb-2">No name suggestions yet!</div>
+                    <div className="text-white/80 text-sm">
+                      {connected ? 'Be the first to suggest a name for Geomi!' : 'Connect your wallet to suggest the first name!'}
+                    </div>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>
@@ -655,10 +691,12 @@ export default function Home() {
                       </div>
                       <button
                         onClick={() => handlePurchase(pack)}
-                        disabled={accountBalance < (pack.aptPrice ?? pack.price)}
-                        className="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:from-green-400 hover:to-blue-400 transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={!connected || !isRegistered || accountBalance < (pack.aptPrice ?? pack.price)}
+                        className="w-full geomi-btn-primary disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95"
                       >
-                        {accountBalance < (pack.aptPrice ?? pack.price) ? 'Insufficient Balance' : 'Purchase Now'}
+                        {!connected ? 'Connect Wallet' :
+                         !isRegistered ? 'Register First' :
+                         accountBalance < (pack.aptPrice ?? pack.price) ? 'Insufficient Balance' : 'Purchase Now'}
                       </button>
                     </div>
                   ))}
