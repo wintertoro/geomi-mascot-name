@@ -1,4 +1,4 @@
-import { Coins, Star } from 'lucide-react';
+import { Coins, Star } from './Icons';
 import { VotePack } from '../services/blockchain';
 
 interface VoteStoreTabProps {

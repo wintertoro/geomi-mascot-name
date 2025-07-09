@@ -11,11 +11,12 @@ import {
   Target,
   CheckCircle,
   Coins
-} from 'lucide-react';
+} from './components/Icons';
 import { WalletConnection } from './components/WalletConnection';
 import { MainTab } from './components/MainTab';
 import { LeaderboardTab } from './components/LeaderboardTab';
 import { VoteStoreTab } from './components/VoteStoreTab';
+import { GitHubLink } from './components/GitHubLink';
 import { 
   registerUser, 
   suggestName, 
@@ -232,6 +233,12 @@ export default function Home() {
                 <strong>Strategy:</strong> Use multiple paid votes on favorites
               </div>
             </div>
+            <div className="flex items-start gap-3">
+              <CheckCircle size={16} className="mt-1" />
+              <div>
+                <strong>Important:</strong> Votes cannot be removed once cast
+              </div>
+            </div>
           </div>
         </div>
 
@@ -281,9 +288,14 @@ export default function Home() {
     <div className="min-h-screen bw-gradient p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="text-center py-6">
-          <h1 className="text-4xl font-bold mb-4">Name Our Mascot "Geomi"!</h1>
-          <p className="text-lg mb-6">Join our community in choosing the perfect name for our beloved mascot!</p>
+        <div className="flex items-start justify-between py-6">
+          <div className="flex-1 text-center">
+            <h1 className="text-4xl font-bold mb-4">Name Our Mascot "Geomi"!</h1>
+            <p className="text-lg mb-6">Join our community in choosing the perfect name for our beloved mascot!</p>
+          </div>
+          <div className="flex-shrink-0">
+            <WalletConnection />
+          </div>
         </div>
 
         {/* Tab Navigation */}
@@ -323,32 +335,20 @@ export default function Home() {
         {/* Status Section */}
         {activeTab !== 'instructions' && (
           <div className="mb-8">
-            {/* Connection Status */}
-            <div className="flex flex-wrap justify-center gap-4 mb-6">
-              <WalletConnection />
-              
-              {connected && account ? (
-                <>
-                  <div className="status-badge active">
-                    Balance: {accountBalance.toFixed(2)} APT
-                  </div>
-                  {userAccount && (
-                    <>
-                      <div className="status-badge inactive">
-                        Free Votes: {userAccount.freeVotesRemaining}
-                      </div>
-                      <div className="status-badge inactive">
-                        Paid Votes: {userAccount.paidVotesOwned}
-                      </div>
-                    </>
-                  )}
-                </>
-              ) : (
-                <div className="status-badge inactive">
-                  Connect wallet to start voting!
+            {/* User Stats */}
+            {connected && account && userAccount && (
+              <div className="flex flex-wrap justify-center gap-4 mb-6">
+                <div className="status-badge active">
+                  Balance: {accountBalance.toFixed(2)} APT
                 </div>
-              )}
-            </div>
+                <div className="status-badge inactive">
+                  Free Votes: {userAccount.freeVotesRemaining}
+                </div>
+                <div className="status-badge inactive">
+                  Paid Votes: {userAccount.paidVotesOwned}
+                </div>
+              </div>
+            )}
 
             {/* Status Message */}
             {status && (
@@ -407,10 +407,13 @@ export default function Home() {
       {/* Footer */}
       <div className="text-center mt-16 pb-8">
         <div className="glass-card max-w-3xl mx-auto p-4">
-          <div className="flex flex-wrap justify-center gap-6 text-sm">
+          <div className="flex flex-wrap justify-center gap-6 text-sm mb-4">
             <span>{suggestions.length} names suggested</span>
             <span>{suggestions.reduce((sum, s) => sum + s.totalVotes, 0)} total votes</span>
             <span>{prizePool.total.toFixed(2)} APT prize pool</span>
+          </div>
+          <div className="flex justify-center">
+            <GitHubLink />
           </div>
         </div>
       </div>

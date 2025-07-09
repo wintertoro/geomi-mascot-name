@@ -1,4 +1,4 @@
-import { Trophy } from 'lucide-react';
+import { Trophy } from './Icons';
 import { NameSuggestion, UserAccount } from '../services/blockchain';
 
 interface LeaderboardTabProps {

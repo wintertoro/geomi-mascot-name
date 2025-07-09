@@ -1,4 +1,4 @@
-import { Plus } from 'lucide-react';
+import { Plus } from './Icons';
 import { NameSuggestion, UserAccount } from '../services/blockchain';
 
 interface MainTabProps {
@@ -74,16 +74,7 @@ export const MainTab = ({
            'Submit Name (Uses Free Vote)'}
         </button>
       </form>
-      
-      <div className="mt-4 pt-4 border-t border-black">
-        <button
-          onClick={() => setActiveTab('store')}
-          disabled={!connected || !isRegistered}
-          className="w-full glass-button disabled:opacity-50"
-        >
-          {!connected ? 'Connect Wallet to Buy Votes' : 'Buy More Votes'}
-        </button>
-      </div>
+
     </div>
 
     {/* Recent Suggestions Preview */}

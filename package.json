@@ -3,17 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
-    "build:turbo": "next build --experimental-build-mode=compile",
+    "build:fast": "NODE_ENV=production next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint --fix"
   },
   "dependencies": {
     "@aptos-labs/ts-sdk": "^3.1.2",
     "@aptos-labs/wallet-adapter-ant-design": "^5.0.1",
     "@aptos-labs/wallet-adapter-react": "^7.0.1",
-    "lucide-react": "^0.525.0",
     "next": "14.2.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

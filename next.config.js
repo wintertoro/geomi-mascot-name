@@ -10,24 +10,21 @@ const nextConfig = {
     // Enable modern JS compilation
     esmExternals: true,
     // Reduce compilation time
-    optimizePackageImports: ['lucide-react', '@aptos-labs/wallet-adapter-react'],
+    optimizePackageImports: ['@aptos-labs/wallet-adapter-react'],
     // Optimize server components
     serverComponentsExternalPackages: ['@aptos-labs/ts-sdk'],
+    // Enable partial prerendering for faster builds
+    ppr: false,
+    // Optimize CSS - disabled due to critters issue
+    optimizeCss: false,
   },
-  // Enable build caching
-  onDemandEntries: {
-    // Period (in ms) where the server will keep pages in the buffer
-    maxInactiveAge: 25 * 1000,
-    // Number of pages that should be kept simultaneously without being disposed
-    pagesBufferLength: 2,
-  },
-  // Optimize images
+  // Disable image optimization for faster builds
   images: {
-    unoptimized: true, // Disable image optimization for faster builds
+    unoptimized: true,
   },
   // Enable webpack optimizations
   webpack: (config, { dev, isServer }) => {
-    // Optimize for production builds
+    // Production optimizations
     if (!dev) {
       config.optimization = {
         ...config.optimization,
@@ -35,22 +32,49 @@ const nextConfig = {
         sideEffects: false,
         splitChunks: {
           chunks: 'all',
+          minSize: 20000,
+          maxSize: 244000,
           cacheGroups: {
             vendor: {
               test: /[\\/]node_modules[\\/]/,
               name: 'vendors',
               chunks: 'all',
+              priority: 10,
+              reuseExistingChunk: true,
+            },
+            common: {
+              minChunks: 2,
+              chunks: 'all',
+              name: 'common',
+              priority: 5,
+              reuseExistingChunk: true,
             },
           },
         },
       };
+      
+      // Aggressive module resolution for smaller bundles
+      config.resolve.alias = {
+        ...config.resolve.alias,
+      };
     }
     
-    // Reduce bundle size
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      'lucide-react': require.resolve('lucide-react'),
-    };
+    // Development optimizations
+    if (dev) {
+      config.watchOptions = {
+        poll: 1000,
+        aggregateTimeout: 300,
+        ignored: ['**/node_modules', '**/.git', '**/.next'],
+      };
+      
+      // Faster compilation in dev
+      config.cache = {
+        type: 'filesystem',
+        buildDependencies: {
+          config: [__filename],
+        },
+      };
+    }
     
     return config;
   },
@@ -61,6 +85,23 @@ const nextConfig = {
   generateEtags: false,
   // Compress static assets
   compress: true,
+  // Optimize dev builds
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
+  },
+  // Skip type checking during build for speed
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+  // Skip ESLint during build
+  eslint: {
+    ignoreDuringBuilds: false,
+  },
+  // Optimize page data
+  pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
+  // Disable source maps in production for faster builds
+  productionBrowserSourceMaps: false,
 };
 
 module.exports = nextConfig; 

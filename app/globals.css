@@ -2,27 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 255, 255, 255;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-}
-
 body {
-  color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-start-rgb));
-  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
+  color: black;
+  background: white;
+  font-family: system-ui, -apple-system, sans-serif;
 }
 
-/* Simple black and white theme */
+/* Minimal styles only */
 .bw-gradient {
   background: white;
   color: black;
@@ -42,7 +28,6 @@ body {
   padding: 8px 16px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s ease;
 }
 
 .glass-button:hover {
@@ -70,7 +55,6 @@ body {
 .glass-input:focus {
   outline: none;
   border-color: #333;
-  background: #f9f9f9;
 }
 
 .suggestion-card {
@@ -78,11 +62,6 @@ body {
   border: 2px solid black;
   border-radius: 8px;
   padding: 16px;
-  transition: transform 0.2s ease;
-}
-
-.suggestion-card:hover {
-  transform: translateY(-2px);
 }
 
 .status-badge {
@@ -132,7 +111,6 @@ body {
   gap: 8px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s ease;
 }
 
 .tab-inactive:hover {
