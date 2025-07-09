@@ -8,35 +8,35 @@ export const WalletConnection = () => {
   const { account, connected, wallet, network } = useWallet();
 
   return (
-    <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 shadow-lg">
+    <div className="glass-card p-4">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Wallet className="text-white" size={24} />
-          <h2 className="text-xl font-bold text-white">Wallet Connection</h2>
+          <Wallet size={20} />
+          <h2 className="text-lg font-bold">Wallet Connection</h2>
         </div>
-        <div className="flex items-center gap-2 text-white/70 text-sm">
-          <span>Network: {network?.name || 'Not Connected'}</span>
+        <div className="text-sm text-gray-600">
+          Network: {network?.name || 'Not Connected'}
         </div>
       </div>
       
       {connected && account ? (
         <div className="space-y-3">
-          <div className="bg-white/20 rounded-lg p-3">
+          <div className="border border-black rounded-lg p-3">
             <div className="flex items-center gap-2 mb-2">
-              <Users className="text-white" size={16} />
-              <span className="text-white font-medium">Connected Account</span>
+              <Users size={16} />
+              <span className="font-medium">Connected Account</span>
             </div>
-            <div className="text-white/90 text-sm font-mono">
+            <div className="text-sm font-mono text-gray-700">
               {account.address.toString()}
             </div>
           </div>
           
-          <div className="bg-white/20 rounded-lg p-3">
+          <div className="border border-black rounded-lg p-3">
             <div className="flex items-center gap-2 mb-2">
-              <Wallet className="text-white" size={16} />
-              <span className="text-white font-medium">Wallet</span>
+              <Wallet size={16} />
+              <span className="font-medium">Wallet</span>
             </div>
-            <div className="text-white/90 text-sm">
+            <div className="text-sm">
               {wallet?.name || 'Unknown Wallet'}
             </div>
           </div>
@@ -44,7 +44,7 @@ export const WalletConnection = () => {
       ) : (
         <div className="text-center">
           <div className="mb-4">
-            <div className="text-white/80 text-sm mb-2">
+            <div className="text-gray-600 text-sm mb-2">
               Connect your Aptos wallet to start voting
             </div>
           </div>
