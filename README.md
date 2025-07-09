@@ -1,36 +1,234 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎭 Geomi Mascot Naming Contest - Web3 Voting dApp
 
-## Getting Started
+A decentralized voting application built on the Aptos blockchain for naming our "Geomi" mascot. Users can suggest names, vote with APT tokens, and compete for the prize pool in a transparent, blockchain-based contest.
 
-First, run the development server:
+## ✨ Features
 
+### 🗳️ **Voting System**
+- **Multiple Name Voting**: Vote for as many different names as you like
+- **Dual Vote Types**: 
+  - **Free Votes**: One per name (included with registration)
+  - **Paid Votes**: Unlimited per name for maximum impact
+- **Strategic Voting**: Stack multiple paid votes on your favorites
+- **Permanent Votes**: All votes are irreversible once cast
+
+### 💰 **Monetization & Rewards**
+- **Vote Packs**: Purchase with APT tokens (5-60 votes for 5-45 APT)
+- **Growing Prize Pool**: All vote pack purchases go into the reward pool
+- **Winner Takes All**: Most voted name wins the entire APT prize pool
+- **Real Cryptocurrency**: Actual APT token transactions on Aptos testnet
+
+### 🎨 **User Experience**
+- **Wallet Integration**: Support for Petra, Martian, and other Aptos wallets
+- **Tabbed Interface**: Separate voting and instructions tabs
+- **Real-time Updates**: Live vote counts and prize pool tracking
+- **Responsive Design**: Works on desktop and mobile devices
+
+## 🚀 Tech Stack
+
+### Frontend
+- **Next.js 15** - React framework with App Router
+- **TypeScript** - Type-safe development
+- **Tailwind CSS** - Utility-first styling
+- **Lucide React** - Beautiful icons
+
+### Blockchain
+- **Aptos Blockchain** - Layer 1 blockchain platform
+- **Move Language** - Smart contract programming
+- **Aptos Wallet Adapter** - Wallet connection and transactions
+- **Aptos TypeScript SDK** - Blockchain interactions
+
+### Smart Contract Features
+- User registration and account management
+- Name suggestion with duplicate prevention
+- Dual voting system (free/paid)
+- Vote pack purchasing with APT tokens
+- Prize pool accumulation and tracking
+- Event emission for transparency
+
+## 📋 Prerequisites
+
+- **Node.js** 18+ 
+- **npm** or **yarn**
+- **Aptos CLI** (for smart contract deployment)
+- **Aptos Wallet** (Petra, Martian, etc.)
+
+## 🛠️ Installation & Setup
+
+### 1. Clone the Repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <your-repo-url>
+cd geomi-mascot-name
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install Dependencies
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Environment Variables
+Create a `.env.local` file in the root directory:
+```env
+NEXT_PUBLIC_CONTRACT_ADDRESS=your_deployed_contract_address
+NEXT_PUBLIC_APTOS_NETWORK=testnet
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Run the Development Server
+```bash
+npm run dev
+```
 
-## Learn More
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-To learn more about Next.js, take a look at the following resources:
+## 📜 Smart Contract Deployment
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 1. Install Aptos CLI
+```bash
+# macOS
+brew install aptos
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Or download from: https://github.com/aptos-labs/aptos-core/releases
+```
 
-## Deploy on Vercel
+### 2. Initialize Aptos Profile
+```bash
+aptos init --network testnet
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 3. Deploy the Contract
+```bash
+cd contract
+aptos move publish --named-addresses geomi_mascot_voting=<your-address>
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 4. Update Environment Variables
+Add the deployed contract address to your `.env.local` file.
+
+## 🎮 How to Play
+
+### For First-Time Users
+1. **Connect Wallet**: Use your Aptos wallet (Petra recommended)
+2. **Register**: Get your free vote by registering your account
+3. **Suggest Names**: Submit creative names for the Geomi mascot
+4. **Vote Strategically**: Use free votes across multiple names
+
+### For Active Participants
+1. **Buy Vote Packs**: Purchase additional votes with APT tokens
+2. **Stack Votes**: Use multiple paid votes on your favorite names
+3. **Monitor Leaderboard**: Track which names are winning
+4. **Claim Rewards**: Winner takes the entire APT prize pool
+
+## 💎 Vote Pack Options
+
+| Pack | Votes | Price | Value |
+|------|-------|-------|-------|
+| **Starter** | 5 votes | 5 APT | 1.0 APT/vote |
+| **Booster** ⭐ | 12 votes | 10 APT | 0.83 APT/vote |
+| **Power** | 25 votes | 20 APT | 0.8 APT/vote |
+| **Champion** | 60 votes | 45 APT | 0.75 APT/vote |
+
+*⭐ Most Popular Choice*
+
+## 🏗️ Project Structure
+
+```
+geomi-mascot-name/
+├── app/                          # Next.js App Router
+│   ├── components/               # React components
+│   │   ├── WalletConnection.tsx  # Wallet integration
+│   │   └── WalletProvider.tsx    # Wallet context provider
+│   ├── services/                 # Business logic
+│   │   └── blockchain.ts         # Blockchain interactions
+│   ├── globals.css               # Global styles
+│   ├── layout.tsx                # Root layout
+│   └── page.tsx                  # Main voting interface
+├── contract/                     # Aptos Move contracts
+│   ├── sources/
+│   │   └── voting.move          # Main voting contract
+│   └── Move.toml                # Contract configuration
+├── public/                      # Static assets
+└── package.json                # Dependencies
+```
+
+## 🔧 Development
+
+### Smart Contract Development
+```bash
+# Test the contract
+cd contract
+aptos move test
+
+# Compile without publishing
+aptos move compile
+```
+
+### Frontend Development
+```bash
+# Run with hot reload
+npm run dev
+
+# Build for production
+npm run build
+
+# Run production build
+npm start
+```
+
+## 🎯 Voting Rules
+
+### ✅ **Allowed Actions**
+- Vote for multiple different names
+- Use one free vote per name
+- Purchase and use unlimited paid votes per name
+- Suggest new names (costs 1 free vote)
+
+### ❌ **Restrictions**
+- Cannot remove votes once cast
+- Cannot vote for the same name with multiple free votes
+- Must have sufficient balance for vote pack purchases
+- Cannot suggest duplicate names
+
+## 🏆 Prize Pool Mechanics
+
+- **Funding**: All APT spent on vote packs goes directly to the prize pool
+- **Winner**: The name with the most total votes (free + paid) wins
+- **Payout**: Winner receives the entire accumulated APT prize pool
+- **Transparency**: All transactions are recorded on the Aptos blockchain
+
+## 🛡️ Security & Trust
+
+- **Decentralized**: All voting data stored on Aptos blockchain
+- **Transparent**: All transactions are publicly verifiable
+- **Immutable**: Votes cannot be changed or deleted
+- **Fair**: Equal opportunity for all participants
+- **Auditable**: Smart contract code is open source
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Aptos Labs](https://aptoslabs.com/) for the blockchain infrastructure
+- [Next.js](https://nextjs.org/) for the frontend framework
+- [Tailwind CSS](https://tailwindcss.com/) for the styling system
+- The community for creative mascot name suggestions
+
+## 📞 Support
+
+For questions, issues, or suggestions:
+- Open an issue on GitHub
+- Check the Instructions tab in the app
+- Review the smart contract documentation
+
+---
+
+**Built with ❤️ for the Geomi community** 🎭
