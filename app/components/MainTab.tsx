@@ -10,8 +10,7 @@ interface MainTabProps {
   isSubmitting: boolean;
   userAccount: UserAccount | null;
   suggestions: NameSuggestion[];
-  setActiveTab: (tab: 'main' | 'leaderboard' | 'instructions') => void;
-  setShowVoteStore: (show: boolean) => void;
+  setActiveTab: (tab: 'main' | 'leaderboard' | 'instructions' | 'store') => void;
   handleRegister: () => void;
   handleSubmit: (e: React.FormEvent) => void;
 }
@@ -26,7 +25,6 @@ export const MainTab = ({
   userAccount,
   suggestions,
   setActiveTab,
-  setShowVoteStore,
   handleRegister,
   handleSubmit,
 }: MainTabProps) => (
@@ -79,11 +77,11 @@ export const MainTab = ({
       
       <div className="mt-4 pt-4 border-t border-black">
         <button
-          onClick={() => setShowVoteStore(true)}
+          onClick={() => setActiveTab('store')}
           disabled={!connected || !isRegistered}
           className="w-full glass-button disabled:opacity-50"
         >
-          {!connected ? 'Connect Wallet to Buy Votes' : 'Get More Votes'}
+          {!connected ? 'Connect Wallet to Buy Votes' : 'Buy More Votes'}
         </button>
       </div>
     </div>

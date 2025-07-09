@@ -9,11 +9,13 @@ import {
   Star, 
   Crown, 
   Target,
-  CheckCircle 
+  CheckCircle,
+  Coins
 } from 'lucide-react';
 import { WalletConnection } from './components/WalletConnection';
 import { MainTab } from './components/MainTab';
 import { LeaderboardTab } from './components/LeaderboardTab';
+import { VoteStoreTab } from './components/VoteStoreTab';
 import { 
   registerUser, 
   suggestName, 
@@ -35,7 +37,7 @@ const VOTE_PACKS: VotePack[] = [
   { id: 'champion', name: 'Champion Pack', votes: 60, price: 45, aptPrice: 45 },
 ];
 
-type TabType = 'main' | 'leaderboard' | 'instructions';
+type TabType = 'main' | 'leaderboard' | 'instructions' | 'store';
 
 export default function Home() {
   const { account, connected, signAndSubmitTransaction } = useWallet();
@@ -44,7 +46,6 @@ export default function Home() {
   const [userAccount, setUserAccount] = useState<UserAccount | null>(null);
   const [newName, setNewName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showVoteStore, setShowVoteStore] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [prizePool, setPrizePool] = useState({ total: 0, contributors: 0 });
@@ -170,7 +171,6 @@ export default function Home() {
       await purchaseVotePack(account.address.toString(), pack.id, price, signAndSubmitTransaction);
       await loadData();
       setStatus(`${pack.name} purchased successfully!`);
-      setShowVoteStore(false);
     } catch (error) {
       console.error('Purchase failed:', error);
       setStatus('Purchase failed. Please check your balance and try again.');
@@ -288,7 +288,7 @@ export default function Home() {
 
         {/* Tab Navigation */}
         <div className="flex justify-center mb-8">
-          <div className="flex gap-1 border-2 border-black rounded-lg p-1">
+          <div className="flex gap-1 border-2 border-black rounded-lg p-1 flex-wrap">
             <button
               onClick={() => setActiveTab('main')}
               className={activeTab === 'main' ? 'tab-active' : 'tab-inactive'}
@@ -302,6 +302,13 @@ export default function Home() {
             >
               <Trophy size={16} />
               Leaderboard
+            </button>
+            <button
+              onClick={() => setActiveTab('store')}
+              className={activeTab === 'store' ? 'tab-active' : 'tab-inactive'}
+            >
+              <Coins size={16} />
+              Buy Votes
             </button>
             <button
               onClick={() => setActiveTab('instructions')}
@@ -373,6 +380,13 @@ export default function Home() {
             userAccount={userAccount}
             handleVote={handleVote}
           />
+        ) : activeTab === 'store' ? (
+          <VoteStoreTab
+            connected={connected}
+            isRegistered={isRegistered}
+            accountBalance={accountBalance}
+            handlePurchase={handlePurchase}
+          />
         ) : (
           <MainTab
             connected={connected}
@@ -384,68 +398,11 @@ export default function Home() {
             userAccount={userAccount}
             suggestions={suggestions}
             setActiveTab={setActiveTab}
-            setShowVoteStore={setShowVoteStore}
             handleRegister={handleRegister}
             handleSubmit={handleSubmit}
           />
         )}
       </div>
-
-      {/* Vote Store Modal */}
-      {showVoteStore && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold">Vote Store</h2>
-              <button
-                onClick={() => setShowVoteStore(false)}
-                className="glass-button"
-              >
-                ✕
-              </button>
-            </div>
-            
-            <div className="glass-card p-4 mb-6">
-              <div className="text-center">
-                <h3 className="font-bold mb-2">How Vote Packs Work</h3>
-                <div className="text-sm space-y-1">
-                  <div>Free votes: 1 per name</div>
-                  <div>Paid votes: unlimited</div>
-                  <div>Your balance: {accountBalance.toFixed(2)} APT</div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="grid md:grid-cols-2 gap-4">
-              {VOTE_PACKS.map((pack) => (
-                <div key={pack.id} className="glass-card p-4">
-                  {pack.popular && (
-                    <div className="status-badge active mb-2 text-xs">MOST POPULAR</div>
-                  )}
-                  <div className="text-center mb-4">
-                    <h3 className="font-bold text-lg">{pack.name}</h3>
-                    <div className="text-2xl font-bold">{pack.votes} votes</div>
-                    <div className="text-xl font-bold">{pack.aptPrice ?? pack.price} APT</div>
-                    <div className="text-xs text-gray-600">
-                      {((pack.aptPrice ?? pack.price) / pack.votes).toFixed(3)} APT per vote
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handlePurchase(pack)}
-                    disabled={!connected || !isRegistered || accountBalance < (pack.aptPrice ?? pack.price)}
-                    className="w-full glass-button primary disabled:opacity-50"
-                  >
-                    {!connected ? 'Connect Wallet' :
-                     !isRegistered ? 'Register First' :
-                     accountBalance < (pack.aptPrice ?? pack.price) ? 'Insufficient Balance' : 
-                     'Purchase Now'}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Footer */}
       <div className="text-center mt-16 pb-8">
