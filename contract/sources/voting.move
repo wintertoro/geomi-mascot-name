@@ -53,7 +53,8 @@ module geomi_mascot_voting::voting {
         suggestions: vector<NameSuggestion>,
         users: vector<UserAccount>,
         user_addresses: vector<address>,
-        prize_pool: u64,
+        prize_pool: Coin<AptosCoin>,
+        prize_pool_amount: u64,
         contributors: u64,
         next_suggestion_id: u64,
         voting_end_time: u64,
@@ -91,7 +92,8 @@ module geomi_mascot_voting::voting {
             suggestions: vector::empty<NameSuggestion>(),
             users: vector::empty<UserAccount>(),
             user_addresses: vector::empty<address>(),
-            prize_pool: 0,
+            prize_pool: coin::zero<AptosCoin>(),
+            prize_pool_amount: 0,
             contributors: 0,
             next_suggestion_id: 1,
             voting_end_time: timestamp::now_seconds() + voting_duration_seconds,
@@ -216,11 +218,10 @@ module geomi_mascot_voting::voting {
     }
 
     /// Purchase vote pack
-    public fun purchase_vote_pack(user: &signer, pack_type: String, payment: Coin<AptosCoin>) acquires VotingSystem {
+    public fun purchase_vote_pack(user: &signer, pack_type: String, payment_amount: u64) acquires VotingSystem {
         let user_addr = signer::address_of(user);
         let voting_system = borrow_global_mut<VotingSystem>(@geomi_mascot_voting);
         
-        let payment_amount = coin::value(&payment);
         let (votes_to_add, expected_price) = if (pack_type == string::utf8(b"starter")) {
             (STARTER_PACK_VOTES, STARTER_PACK_PRICE)
         } else if (pack_type == string::utf8(b"booster")) {
@@ -235,9 +236,12 @@ module geomi_mascot_voting::voting {
         
         assert!(payment_amount >= expected_price, E_INSUFFICIENT_PAYMENT);
         
-        // Add payment to prize pool
-        coin::destroy_zero(payment);
-        voting_system.prize_pool = voting_system.prize_pool + payment_amount;
+        // Withdraw payment from user's account
+        let payment = coin::withdraw<AptosCoin>(user, payment_amount);
+        
+        // Add payment to prize pool - properly merge the coins
+        coin::merge(&mut voting_system.prize_pool, payment);
+        voting_system.prize_pool_amount = voting_system.prize_pool_amount + payment_amount;
         voting_system.contributors = voting_system.contributors + 1;
         
         // Find user account
@@ -302,7 +306,7 @@ module geomi_mascot_voting::voting {
     #[view]
     public fun get_prize_pool(): (u64, u64) acquires VotingSystem {
         let voting_system = borrow_global<VotingSystem>(@geomi_mascot_voting);
-        (voting_system.prize_pool, voting_system.contributors)
+        (voting_system.prize_pool_amount, voting_system.contributors)
     }
 
     #[view]

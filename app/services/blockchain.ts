@@ -54,7 +54,35 @@ class BlockchainService {
   constructor() {
     const config = new AptosConfig({ network: Network.TESTNET });
     this.aptos = new Aptos(config);
+    
+    // Validate contract address
     this.contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "";
+    if (!this.contractAddress) {
+      console.error('NEXT_PUBLIC_CONTRACT_ADDRESS environment variable is not set');
+      // In development, we can continue but all blockchain calls will fail gracefully
+    }
+  }
+
+  // Initialize the voting system (admin only)
+  async initialize(
+    adminAddress: string,
+    votingDurationSeconds: number,
+    signAndSubmitTransaction: (transaction: any) => Promise<any>
+  ): Promise<string> {
+    if (!this.contractAddress) {
+      throw new Error('Contract address is not configured. Please set NEXT_PUBLIC_CONTRACT_ADDRESS environment variable.');
+    }
+
+    const transaction = await this.aptos.transaction.build.simple({
+      sender: adminAddress,
+      data: {
+        function: `${this.contractAddress}::voting::initialize`,
+        functionArguments: [new U64(votingDurationSeconds)],
+      },
+    });
+
+    const committedTransaction = await signAndSubmitTransaction(transaction);
+    return committedTransaction.hash;
   }
 
   // Register a new user
@@ -62,6 +90,10 @@ class BlockchainService {
     userAddress: string,
     signAndSubmitTransaction: (transaction: any) => Promise<any>
   ): Promise<string> {
+    if (!this.contractAddress) {
+      throw new Error('Contract address is not configured. Please set NEXT_PUBLIC_CONTRACT_ADDRESS environment variable.');
+    }
+
     const transaction = await this.aptos.transaction.build.simple({
       sender: userAddress,
       data: {
@@ -80,6 +112,10 @@ class BlockchainService {
     name: string,
     signAndSubmitTransaction: (transaction: any) => Promise<any>
   ): Promise<string> {
+    if (!this.contractAddress) {
+      throw new Error('Contract address is not configured. Please set NEXT_PUBLIC_CONTRACT_ADDRESS environment variable.');
+    }
+
     const transaction = await this.aptos.transaction.build.simple({
       sender: userAddress,
       data: {
@@ -99,6 +135,10 @@ class BlockchainService {
     isPaidVote: boolean,
     signAndSubmitTransaction: (transaction: any) => Promise<any>
   ): Promise<string> {
+    if (!this.contractAddress) {
+      throw new Error('Contract address is not configured. Please set NEXT_PUBLIC_CONTRACT_ADDRESS environment variable.');
+    }
+
     const transaction = await this.aptos.transaction.build.simple({
       sender: userAddress,
       data: {
@@ -121,6 +161,10 @@ class BlockchainService {
     aptAmount: number,
     signAndSubmitTransaction: (transaction: any) => Promise<any>
   ): Promise<string> {
+    if (!this.contractAddress) {
+      throw new Error('Contract address is not configured. Please set NEXT_PUBLIC_CONTRACT_ADDRESS environment variable.');
+    }
+
     const octasAmount = aptAmount * 100000000; // Convert APT to octas
     
     const transaction = await this.aptos.transaction.build.simple({
@@ -140,6 +184,11 @@ class BlockchainService {
 
   // View functions
   async getSuggestions(): Promise<NameSuggestion[]> {
+    if (!this.contractAddress) {
+      console.error('Contract address is not configured. Please set NEXT_PUBLIC_CONTRACT_ADDRESS environment variable.');
+      return [];
+    }
+
     try {
       const result = await this.aptos.view({
         payload: {
@@ -166,6 +215,11 @@ class BlockchainService {
   }
 
   async getUserAccount(userAddress: string): Promise<UserAccount | null> {
+    if (!this.contractAddress) {
+      console.error('Contract address is not configured. Please set NEXT_PUBLIC_CONTRACT_ADDRESS environment variable.');
+      return null;
+    }
+
     try {
       const result = await this.aptos.view({
         payload: {
@@ -188,6 +242,11 @@ class BlockchainService {
   }
 
   async getPrizePool(): Promise<PrizePool> {
+    if (!this.contractAddress) {
+      console.error('Contract address is not configured. Please set NEXT_PUBLIC_CONTRACT_ADDRESS environment variable.');
+      return { total: 0, contributors: 0 };
+    }
+
     try {
       const result = await this.aptos.view({
         payload: {
@@ -208,6 +267,11 @@ class BlockchainService {
   }
 
   async getVotingEndTime(): Promise<number> {
+    if (!this.contractAddress) {
+      console.error('Contract address is not configured. Please set NEXT_PUBLIC_CONTRACT_ADDRESS environment variable.');
+      return 0;
+    }
+
     try {
       const result = await this.aptos.view({
         payload: {
@@ -225,12 +289,16 @@ class BlockchainService {
 
   // Helper function to check if contract is deployed
   async isContractDeployed(): Promise<boolean> {
-    if (!this.contractAddress) return false;
+    if (!this.contractAddress) {
+      console.error('Contract address is not configured. Please set NEXT_PUBLIC_CONTRACT_ADDRESS environment variable.');
+      return false;
+    }
     
     try {
       await this.getSuggestions();
       return true;
     } catch (error) {
+      console.error('Error checking contract deployment:', error);
       return false;
     }
   }
@@ -262,6 +330,9 @@ class BlockchainService {
 export const blockchainService = new BlockchainService();
 
 // Export convenience functions that wrap the service methods
+export const initialize = (adminAddress: string, votingDurationSeconds: number, signAndSubmitTransaction: any) => 
+  blockchainService.initialize(adminAddress, votingDurationSeconds, signAndSubmitTransaction);
+
 export const registerUser = (userAddress: string, signAndSubmitTransaction: any) => 
   blockchainService.registerUser(userAddress, signAndSubmitTransaction);
 

@@ -5,7 +5,7 @@ interface GitHubLinkProps {
 export const GitHubLink = ({ className = "" }: GitHubLinkProps) => {
   return (
     <a
-      href="https://github.com/jing/geomi-mascot-name"
+      href="https://github.com/wintertoro/geomi-mascot-name"
       target="_blank"
       rel="noopener noreferrer"
       className={`flex items-center gap-2 text-sm hover:opacity-70 transition-opacity ${className}`}
