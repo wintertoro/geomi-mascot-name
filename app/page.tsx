@@ -25,11 +25,12 @@ const VOTE_PACKS: VotePack[] = [
   { id: 'champion', name: 'Champion Pack', votes: 60, price: 45, aptPrice: 45 },
 ];
 
-type TabType = 'voting' | 'instructions';
+type TabType = 'main' | 'leaderboard' | 'instructions';
 
 export default function Home() {
   const { account, connected, signAndSubmitTransaction } = useWallet();
-  const [activeTab, setActiveTab] = useState<TabType>('voting');
+  const [activeTab, setActiveTab] = useState<TabType>('main');
+  const [highlightedNameId, setHighlightedNameId] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<NameSuggestion[]>([]);
   const [userAccount, setUserAccount] = useState<UserAccount | null>(null);
   const [newName, setNewName] = useState('');
@@ -54,6 +55,16 @@ export default function Home() {
       setAccountBalance(0);
     }
   }, [connected, account]);
+
+  // Handle URL parameters for highlighting specific names
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const nameId = urlParams.get('highlight');
+    if (nameId) {
+      setHighlightedNameId(nameId);
+      setActiveTab('leaderboard'); // Switch to leaderboard when highlighting a name
+    }
+  }, []);
 
   const loadData = async () => {
     if (!account) return;
@@ -176,6 +187,331 @@ export default function Home() {
   };
 
   const sortedSuggestions = [...suggestions].sort((a, b) => b.totalVotes - a.totalVotes);
+  
+  // Get random suggestions for main page (excluding highlighted one)
+  const getRandomSuggestions = (count: number) => {
+    const filtered = suggestions.filter(s => s.id !== highlightedNameId);
+    const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, count);
+  };
+
+  // Generate shareable link for a name
+  const generateShareLink = (nameId: string) => {
+    const baseUrl = window.location.origin + window.location.pathname;
+    return `${baseUrl}?highlight=${nameId}`;
+  };
+
+  // Copy link to clipboard
+  const copyShareLink = async (nameId: string) => {
+    const link = generateShareLink(nameId);
+    try {
+      await navigator.clipboard.writeText(link);
+      setStatus('Share link copied to clipboard!');
+    } catch (err) {
+      setStatus('Could not copy link to clipboard');
+    }
+  };
+
+  // Main Page Component
+  const MainPage = () => {
+    const randomSuggestions = getRandomSuggestions(6);
+    
+    return (
+      <div className="max-w-4xl mx-auto">
+        {/* Name Suggestion Form */}
+        <div className="bw-gradient-card rounded-2xl p-8 shadow-xl mb-8">
+          <div className="text-center mb-6">
+            <h2 className="text-3xl font-bold text-white mb-2">Suggest a Name for Geomi!</h2>
+            <p className="text-white/80">Help us choose the perfect name for our mascot</p>
+          </div>
+          
+          {/* Registration prompt for non-registered users */}
+          {connected && !isRegistered && (
+            <div className="mb-6 p-4 bg-white/10 rounded-xl">
+              <p className="text-white/90 text-sm mb-3">
+                Register to get your free vote and suggest names!
+              </p>
+              <button
+                onClick={handleRegister}
+                disabled={isRegistering}
+                className="w-full bw-btn-secondary disabled:opacity-50"
+              >
+                {isRegistering ? 'Registering...' : 'Register & Get Free Vote'}
+              </button>
+            </div>
+          )}
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <input
+                type="text"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder={connected ? "Enter a creative name..." : "Connect wallet to suggest names"}
+                className="w-full px-6 py-4 rounded-xl bg-white/90 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:bg-white transition-all disabled:opacity-50 text-lg"
+                disabled={!connected || !isRegistered}
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={!connected || !isRegistered || isSubmitting || !newName.trim() || !userAccount?.freeVotesRemaining}
+              className="w-full bw-btn-primary disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 text-lg py-4"
+            >
+              {!connected ? 'Connect Wallet to Suggest' :
+               !isRegistered ? 'Register First' :
+               isSubmitting ? 'Submitting...' : 
+               !userAccount?.freeVotesRemaining ? 'No Free Votes Left' :
+               'Submit Name (Uses Free Vote)'}
+            </button>
+          </form>
+          
+          {/* Buy Votes Button */}
+          <button
+            onClick={() => setShowVoteStore(true)}
+            disabled={!connected || !isRegistered}
+            className="w-full mt-4 bw-btn-secondary disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
+          >
+            <DollarSign size={20} />
+            {!connected ? 'Connect Wallet to Buy Votes' : 'Buy More Votes'}
+          </button>
+        </div>
+
+        {/* Random Names Preview */}
+        <div className="bw-gradient-card rounded-2xl p-6 shadow-xl">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-2xl font-bold text-white">Recent Suggestions</h3>
+            <button
+              onClick={() => setActiveTab('leaderboard')}
+              className="bw-btn-secondary flex items-center gap-2 px-4 py-2"
+            >
+              <Trophy size={16} />
+              View All & Vote
+            </button>
+          </div>
+          
+          {randomSuggestions.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {randomSuggestions.map((suggestion) => (
+                <div key={suggestion.id} className="bg-white/10 rounded-xl p-4 hover:bg-white/20 transition-all">
+                  <h4 className="font-bold text-white text-lg mb-1">{suggestion.name}</h4>
+                  <p className="text-white/70 text-sm mb-2">
+                    {suggestion.totalVotes} vote{suggestion.totalVotes !== 1 ? 's' : ''}
+                  </p>
+                  <p className="text-white/60 text-xs">
+                    by {suggestion.submittedBy.slice(0, 6)}...{suggestion.submittedBy.slice(-4)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-white/70">No suggestions yet. Be the first!</p>
+            </div>
+          )}
+          
+          <div className="text-center mt-6">
+            <button
+              onClick={() => setActiveTab('leaderboard')}
+              className="bw-btn-primary px-8 py-3"
+            >
+              Vote on All Names →
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Leaderboard Component
+  const LeaderboardPage = () => {
+    const highlightedSuggestion = highlightedNameId ? 
+      suggestions.find(s => s.id === highlightedNameId) : null;
+    const otherSuggestions = highlightedNameId ? 
+      sortedSuggestions.filter(s => s.id !== highlightedNameId) : 
+      sortedSuggestions;
+
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-white mb-2">Leaderboard</h2>
+          <p className="text-white/80">Vote for your favorite names!</p>
+        </div>
+
+        {/* Highlighted Name (if coming from share link) */}
+        {highlightedSuggestion && (
+          <div className="mb-8">
+            <div className="bw-gradient-card rounded-2xl p-6 shadow-xl ring-2 ring-white pulse-glow">
+              <div className="text-center mb-4">
+                <div className="inline-flex items-center gap-2 bg-white/20 rounded-full px-4 py-2 mb-4">
+                  <Star className="text-white" size={16} />
+                  <span className="text-white font-semibold">Featured Name</span>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <h3 className="font-bold text-white text-2xl mb-2">{highlightedSuggestion.name}</h3>
+                  <p className="text-white/70 mb-1">
+                    by {highlightedSuggestion.submittedBy.slice(0, 6)}...{highlightedSuggestion.submittedBy.slice(-4)}
+                  </p>
+                  <div className="text-white/60 text-sm">
+                    Free: {highlightedSuggestion.freeVotes} | Paid: {highlightedSuggestion.paidVotes}
+                  </div>
+                </div>
+                <div className="text-center space-y-3">
+                  <div className="text-3xl font-bold text-white">
+                    {highlightedSuggestion.totalVotes}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleVote(highlightedSuggestion.id, false)}
+                      disabled={!connected || !isRegistered || userAccount?.freeVotedNames.includes(highlightedSuggestion.id) || !userAccount?.freeVotesRemaining}
+                      className={`flex items-center gap-1 px-4 py-2 rounded-xl font-semibold transition-all text-sm ${
+                        !connected || !isRegistered
+                          ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                          : userAccount?.freeVotedNames.includes(highlightedSuggestion.id) || !userAccount?.freeVotesRemaining
+                          ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                          : 'bg-gradient-to-r from-white to-gray-200 text-black hover:from-gray-100 hover:to-gray-300 transform hover:scale-105 shadow-lg border border-gray-300'
+                      }`}
+                      title={!connected ? 'Connect wallet to vote' : !isRegistered ? 'Register to vote' : ''}
+                    >
+                      <Star size={14} />
+                      {!connected ? 'Free' : 
+                       !isRegistered ? 'Free' :
+                       userAccount?.freeVotedNames.includes(highlightedSuggestion.id) ? 'Used' : 'Free'}
+                    </button>
+                    
+                    <button
+                      onClick={() => handleVote(highlightedSuggestion.id, true)}
+                      disabled={!connected || !isRegistered || !userAccount?.paidVotesOwned}
+                      className={`flex items-center gap-1 px-4 py-2 rounded-xl font-semibold transition-all text-sm ${
+                        !connected || !isRegistered || !userAccount?.paidVotesOwned
+                          ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                          : 'bg-gradient-to-r from-black to-gray-800 text-white hover:from-gray-800 hover:to-gray-600 transform hover:scale-105 shadow-lg'
+                      }`}
+                      title={!connected ? 'Connect wallet to vote' : !isRegistered ? 'Register to vote' : !userAccount?.paidVotesOwned ? 'Buy vote packs to use paid votes' : ''}
+                    >
+                      <Crown size={14} />
+                      Paid
+                    </button>
+                  </div>
+                  
+                  <button
+                    onClick={() => copyShareLink(highlightedSuggestion.id)}
+                    className="text-white/70 hover:text-white text-sm underline"
+                  >
+                    Share this name
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Voting Rules */}
+        <div className="mb-6 p-4 bg-white/15 backdrop-blur-sm border border-white/20 rounded-xl">
+          <h3 className="font-bold text-white text-sm mb-3 flex items-center gap-2">
+            <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center">
+              <span className="text-black text-xs">🗳️</span>
+            </div>
+            Voting Rules:
+          </h3>
+          <ul className="text-white/90 text-sm space-y-2">
+            <li>• Vote for as many names as you like</li>
+            <li>• One FREE vote per name maximum</li>
+            <li>• Multiple PAID votes allowed per name</li>
+            <li>• Votes cannot be removed once cast</li>
+          </ul>
+        </div>
+
+        {/* All Names */}
+        <div className="bw-gradient-card rounded-2xl p-6 shadow-xl">
+          <h3 className="text-xl font-bold text-white mb-4">All Suggestions</h3>
+          
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {otherSuggestions.length > 0 ? (
+              otherSuggestions.map((suggestion, index) => (
+                <div
+                  key={suggestion.id}
+                  className={`bw-gradient-card p-4 transition-all hover:bg-white/30 ${
+                    index === 0 && !highlightedSuggestion ? 'ring-2 ring-white pulse-glow' : ''
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        {index === 0 && !highlightedSuggestion && <Trophy className="text-white" size={16} />}
+                        <h4 className="font-bold text-white text-lg">{suggestion.name}</h4>
+                      </div>
+                      <p className="text-white/70 text-sm">
+                        by {suggestion.submittedBy.slice(0, 6)}...{suggestion.submittedBy.slice(-4)}
+                      </p>
+                      <div className="text-white/60 text-xs mt-1">
+                        Free: {suggestion.freeVotes} | Paid: {suggestion.paidVotes}
+                      </div>
+                    </div>
+                    <div className="text-center space-y-2">
+                      <div className="text-xl font-bold text-white">
+                        {suggestion.totalVotes}
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleVote(suggestion.id, false)}
+                          disabled={!connected || !isRegistered || userAccount?.freeVotedNames.includes(suggestion.id) || !userAccount?.freeVotesRemaining}
+                          className={`flex items-center gap-1 px-3 py-1 rounded-lg font-medium transition-all text-xs ${
+                            !connected || !isRegistered
+                              ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                              : userAccount?.freeVotedNames.includes(suggestion.id) || !userAccount?.freeVotesRemaining
+                              ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                              : 'bg-gradient-to-r from-white to-gray-200 text-black hover:from-gray-100 hover:to-gray-300 transform hover:scale-105 shadow-lg border border-gray-300'
+                          }`}
+                          title={!connected ? 'Connect wallet to vote' : !isRegistered ? 'Register to vote' : ''}
+                        >
+                          <Star size={12} />
+                          {!connected ? 'Free' : 
+                           !isRegistered ? 'Free' :
+                           userAccount?.freeVotedNames.includes(suggestion.id) ? 'Used' : 'Free'}
+                        </button>
+                        
+                        <button
+                          onClick={() => handleVote(suggestion.id, true)}
+                          disabled={!connected || !isRegistered || !userAccount?.paidVotesOwned}
+                          className={`flex items-center gap-1 px-3 py-1 rounded-lg font-medium transition-all text-xs ${
+                            !connected || !isRegistered || !userAccount?.paidVotesOwned
+                              ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                              : 'bg-gradient-to-r from-black to-gray-800 text-white hover:from-gray-800 hover:to-gray-600 transform hover:scale-105 shadow-lg'
+                          }`}
+                          title={!connected ? 'Connect wallet to vote' : !isRegistered ? 'Register to vote' : !userAccount?.paidVotesOwned ? 'Buy vote packs to use paid votes' : ''}
+                        >
+                          <Crown size={12} />
+                          Paid
+                        </button>
+                      </div>
+                      
+                      <button
+                        onClick={() => copyShareLink(suggestion.id)}
+                        className="text-white/50 hover:text-white/80 text-xs underline"
+                      >
+                        Share
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <div className="text-white/60 mb-2">No name suggestions yet!</div>
+                <div className="text-white/80 text-sm">
+                  {connected ? 'Be the first to suggest a name for Geomi!' : 'Connect your wallet to suggest the first name!'}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   // Instructions Tab Component
   const InstructionsTab = () => (
@@ -190,10 +526,10 @@ export default function Home() {
 
       <div className="grid md:grid-cols-2 gap-6 mb-8">
         {/* Getting Started */}
-        <div className="geomi-gradient-card rounded-xl p-6 shadow-lg">
+        <div className="bw-gradient-card rounded-xl p-6 shadow-lg">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 bg-blue-400 rounded-full flex items-center justify-center">
-              <Users className="text-blue-900" size={20} />
+            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <Users className="text-black" size={20} />
             </div>
             <h2 className="text-xl font-bold text-white">Getting Started</h2>
           </div>
@@ -220,10 +556,10 @@ export default function Home() {
         </div>
 
         {/* Voting Rules */}
-        <div className="geomi-gradient-card rounded-xl p-6 shadow-lg">
+        <div className="bw-gradient-card rounded-xl p-6 shadow-lg">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 bg-purple-400 rounded-full flex items-center justify-center">
-              <Vote className="text-purple-900" size={20} />
+            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <Vote className="text-black" size={20} />
             </div>
             <h2 className="text-xl font-bold text-white">Voting Rules</h2>
           </div>
@@ -250,10 +586,10 @@ export default function Home() {
         </div>
 
         {/* How to Suggest Names */}
-        <div className="geomi-gradient-card rounded-xl p-6 shadow-lg">
+        <div className="bw-gradient-card rounded-xl p-6 shadow-lg">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 bg-green-400 rounded-full flex items-center justify-center">
-              <Plus className="text-green-900" size={20} />
+            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <Plus className="text-black" size={20} />
             </div>
             <h2 className="text-xl font-bold text-white">Suggesting Names</h2>
           </div>
@@ -274,10 +610,10 @@ export default function Home() {
         </div>
 
         {/* Vote Packs */}
-        <div className="geomi-gradient-card rounded-xl p-6 shadow-lg">
+        <div className="bw-gradient-card rounded-xl p-6 shadow-lg">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
-              <Coins className="text-yellow-900" size={20} />
+            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <Coins className="text-black" size={20} />
             </div>
             <h2 className="text-xl font-bold text-white">Vote Packs</h2>
           </div>
@@ -303,11 +639,11 @@ export default function Home() {
       </div>
 
       {/* Prize Pool Section */}
-      <div className="geomi-gradient-card rounded-xl p-6 shadow-lg mb-8">
+      <div className="bw-gradient-card rounded-xl p-6 shadow-lg mb-8">
         <div className="text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center">
-              <Trophy className="text-yellow-900" size={28} />
+            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+              <Trophy className="text-black" size={28} />
             </div>
             <h2 className="text-2xl font-bold text-white">Prize Pool System</h2>
           </div>
@@ -330,10 +666,10 @@ export default function Home() {
       </div>
 
       {/* Strategy Tips */}
-      <div className="geomi-gradient-card rounded-xl p-6 shadow-lg">
+      <div className="bw-gradient-card rounded-xl p-6 shadow-lg">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-8 h-8 bg-cyan-400 rounded-full flex items-center justify-center">
-            <Info className="text-cyan-900" size={20} />
+          <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+            <Info className="text-black" size={20} />
           </div>
           <h2 className="text-xl font-bold text-white">Strategy Tips</h2>
         </div>
@@ -362,38 +698,49 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen geomi-gradient p-4">
+    <div className="min-h-screen bw-gradient p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center py-6">
           <div className="inline-flex items-center gap-3 mb-6">
             <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center float-animation">
-              <Sparkles className="text-orange-500" size={24} />
+              <Sparkles className="text-black" size={24} />
             </div>
-            <h1 className="text-5xl font-bold geomi-title">
+            <h1 className="text-5xl font-bold bw-title">
               Name Our Mascot! "Geomi"
             </h1>
           </div>
           
           {/* Tab Navigation */}
           <div className="flex justify-center mb-8">
-            <div className="geomi-gradient-card rounded-2xl p-2 flex gap-2">
+            <div className="bw-gradient-card rounded-2xl p-2 flex gap-2">
               <button
-                onClick={() => setActiveTab('voting')}
-                className={`flex items-center gap-2 px-8 py-4 rounded-xl font-semibold transition-all ${
-                  activeTab === 'voting'
-                    ? 'geomi-btn-primary text-white'
+                onClick={() => setActiveTab('main')}
+                className={`flex items-center gap-2 px-6 py-4 rounded-xl font-semibold transition-all ${
+                  activeTab === 'main'
+                    ? 'bw-btn-primary text-white'
                     : 'text-white/80 hover:text-white hover:bg-white/10'
                 }`}
               >
-                <Heart size={20} />
-                Voting
+                <Plus size={20} />
+                Submit
+              </button>
+              <button
+                onClick={() => setActiveTab('leaderboard')}
+                className={`flex items-center gap-2 px-6 py-4 rounded-xl font-semibold transition-all ${
+                  activeTab === 'leaderboard'
+                    ? 'bw-btn-primary text-white'
+                    : 'text-white/80 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                <Trophy size={20} />
+                Leaderboard
               </button>
               <button
                 onClick={() => setActiveTab('instructions')}
-                className={`flex items-center gap-2 px-8 py-4 rounded-xl font-semibold transition-all ${
+                className={`flex items-center gap-2 px-6 py-4 rounded-xl font-semibold transition-all ${
                   activeTab === 'instructions'
-                    ? 'geomi-btn-secondary text-white'
+                    ? 'bw-btn-secondary text-black'
                     : 'text-white/80 hover:text-white hover:bg-white/10'
                 }`}
               >
@@ -403,8 +750,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Wallet & Status Info - Show on voting tab */}
-          {activeTab === 'voting' && (
+          {/* Common Status Info */}
+          {activeTab !== 'instructions' && (
             <>
               <p className="text-white/90 text-lg mb-4">
                 Help us choose the perfect name for our Geomi mascot! Use your votes wisely - the winner takes the prize pool!
@@ -416,17 +763,17 @@ export default function Home() {
                 
                 {connected && account ? (
                   <>
-                    <div className="geomi-gradient-card rounded-xl px-4 py-2">
+                    <div className="bw-gradient-card rounded-xl px-4 py-2">
                       <span className="text-white/90 text-sm">Balance: </span>
                       <span className="text-white font-bold">{accountBalance.toFixed(2)} APT</span>
                     </div>
                     {userAccount && (
                       <>
-                        <div className="bg-blue-500/20 backdrop-blur-sm border border-blue-300/30 rounded-xl px-4 py-2">
+                        <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl px-4 py-2">
                           <span className="text-white/90 text-sm">Free Votes: </span>
                           <span className="text-white font-bold">{userAccount.freeVotesRemaining}</span>
                         </div>
-                        <div className="bg-pink-500/20 backdrop-blur-sm border border-pink-300/30 rounded-xl px-4 py-2">
+                        <div className="bg-gray-500/20 backdrop-blur-sm border border-gray-300/30 rounded-xl px-4 py-2">
                           <span className="text-white/90 text-sm">Paid Votes: </span>
                           <span className="text-white font-bold">{userAccount.paidVotesOwned}</span>
                         </div>
@@ -434,7 +781,7 @@ export default function Home() {
                     )}
                   </>
                 ) : (
-                  <div className="bg-orange-500/20 backdrop-blur-sm border border-orange-300/30 rounded-xl px-4 py-2">
+                  <div className="bg-gray-500/20 backdrop-blur-sm border border-gray-300/30 rounded-xl px-4 py-2">
                     <span className="text-white/90 text-sm">⚠️ Connect wallet to participate in voting</span>
                   </div>
                 )}
@@ -448,10 +795,10 @@ export default function Home() {
               )}
 
               {/* Prize Pool */}
-              <div className="geomi-gradient-card rounded-2xl p-6 max-w-2xl mx-auto pulse-glow">
+              <div className="bw-gradient-card rounded-2xl p-6 max-w-2xl mx-auto pulse-glow">
                 <div className="flex items-center justify-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center">
-                    <Trophy className="text-yellow-900" size={24} />
+                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                    <Trophy className="text-black" size={24} />
                   </div>
                   <h2 className="text-2xl font-bold text-white">Prize Pool</h2>
                 </div>
@@ -465,255 +812,89 @@ export default function Home() {
         {/* Tab Content */}
         {activeTab === 'instructions' ? (
           <InstructionsTab />
+        ) : activeTab === 'leaderboard' ? (
+          <LeaderboardPage />
         ) : (
-          // Voting Tab Content
-          <div className="grid lg:grid-cols-3 gap-6">
-            {/* Name Suggestion Form */}
-            <div className="geomi-gradient-card rounded-2xl p-6 shadow-xl">
-              <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                <div className="w-8 h-8 bg-green-400 rounded-full flex items-center justify-center">
-                  <Plus className="text-green-900" size={20} />
-                </div>
-                Suggest a Name
-              </h2>
-              
-              {/* Registration prompt for non-registered users */}
-              {connected && !isRegistered && (
-                <div className="mb-4 p-3 bg-blue-500/20 rounded-lg">
-                  <p className="text-white/90 text-sm mb-2">
-                    Register to get your free vote and suggest names!
-                  </p>
-                  <button
-                    onClick={handleRegister}
-                    disabled={isRegistering}
-                    className="w-full geomi-btn-secondary disabled:opacity-50"
-                  >
-                    {isRegistering ? 'Registering...' : 'Register & Get Free Vote'}
-                  </button>
-                </div>
-              )}
-              
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-white/90 mb-2 font-medium">
-                    Name Suggestion
-                  </label>
-                  <input
-                    type="text"
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    placeholder={connected ? "Enter a creative name..." : "Connect wallet to suggest names"}
-                    className="w-full px-4 py-2 rounded-lg bg-white/90 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:bg-white transition-all disabled:opacity-50"
-                    disabled={!connected || !isRegistered}
-                    required
-                  />
-                </div>
+          <MainPage />
+        )}
+      </div>
+
+      {/* Vote Store Modal */}
+      {showVoteStore && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-xl">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                  <DollarSign className="text-green-500" size={24} />
+                  Vote Store
+                </h2>
                 <button
-                  type="submit"
-                  disabled={!connected || !isRegistered || isSubmitting || !newName.trim() || !userAccount?.freeVotesRemaining}
-                  className="w-full geomi-btn-primary disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95"
+                  onClick={() => setShowVoteStore(false)}
+                  className="text-gray-500 hover:text-gray-700 text-2xl"
                 >
-                  {!connected ? 'Connect Wallet to Suggest' :
-                   !isRegistered ? 'Register First' :
-                   isSubmitting ? 'Submitting...' : 
-                   !userAccount?.freeVotesRemaining ? 'No Free Votes Left' :
-                   'Submit Name (Uses Free Vote)'}
+                  ×
                 </button>
-              </form>
-              
-              {/* Buy Votes Button */}
-              <button
-                onClick={() => setShowVoteStore(true)}
-                disabled={!connected || !isRegistered}
-                className="w-full mt-6 geomi-btn-secondary disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
-              >
-                <DollarSign size={20} />
-                {!connected ? 'Connect Wallet to Buy Votes' : 'Buy More Votes'}
-              </button>
-            </div>
-
-            {/* Voting Section */}
-            <div className="lg:col-span-2 geomi-gradient-card rounded-2xl p-6 shadow-xl">
-              <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                <div className="w-8 h-8 bg-pink-400 rounded-full flex items-center justify-center">
-                  <Heart className="text-pink-900" size={20} />
-                </div>
-                Vote for Your Favorite
-              </h2>
-              
-              {/* Voting Rules Info */}
-              <div className="mb-6 p-4 bg-blue-500/15 backdrop-blur-sm border border-blue-300/20 rounded-xl">
-                <h3 className="font-bold text-white text-sm mb-3 flex items-center gap-2">
-                  <div className="w-5 h-5 bg-blue-400 rounded-full flex items-center justify-center">
-                    <span className="text-blue-900 text-xs">🗳️</span>
-                  </div>
-                  Voting Rules:
-                </h3>
-                <ul className="text-white/90 text-sm space-y-2">
-                  <li>• Vote for as many names as you like</li>
-                  <li>• One FREE vote per name maximum</li>
-                  <li>• Multiple PAID votes allowed per name</li>
-                  <li>• Votes cannot be removed once cast</li>
-                </ul>
               </div>
               
-              <div className="space-y-3 max-h-96 overflow-y-auto">
-                {sortedSuggestions.length > 0 ? (
-                  sortedSuggestions.map((suggestion, index) => (
-                    <div
-                      key={suggestion.id}
-                      className={`geomi-gradient-card p-5 transition-all hover:bg-white/30 ${
-                        index === 0 ? 'ring-2 ring-yellow-400 pulse-glow' : ''
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            {index === 0 && <Trophy className="text-yellow-400" size={16} />}
-                            <h3 className="font-bold text-white text-lg">
-                              {suggestion.name}
-                            </h3>
-                          </div>
-                          <p className="text-white/70 text-sm">
-                            by {suggestion.submittedBy.slice(0, 6)}...{suggestion.submittedBy.slice(-4)}
-                          </p>
-                          <div className="text-white/60 text-xs mt-1">
-                            Free: {suggestion.freeVotes} | Paid: {suggestion.paidVotes}
-                          </div>
-                        </div>
-                        <div className="text-center space-y-2">
-                          <div className="text-2xl font-bold text-white">
-                            {suggestion.totalVotes}
-                          </div>
-                          <div className="flex gap-2">
-                            {/* Free Vote Button */}
-                            <button
-                              onClick={() => handleVote(suggestion.id, false)}
-                              disabled={!connected || !isRegistered || userAccount?.freeVotedNames.includes(suggestion.id) || !userAccount?.freeVotesRemaining}
-                              className={`flex items-center gap-1 px-4 py-2 rounded-xl font-semibold transition-all text-sm ${
-                                !connected || !isRegistered
-                                  ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
-                                  : userAccount?.freeVotedNames.includes(suggestion.id) || !userAccount?.freeVotesRemaining
-                                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                                  : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-400 hover:to-blue-500 transform hover:scale-105 shadow-lg'
-                              }`}
-                              title={!connected ? 'Connect wallet to vote' : !isRegistered ? 'Register to vote' : ''}
-                            >
-                              <Star size={14} />
-                              {!connected ? 'Free' : 
-                               !isRegistered ? 'Free' :
-                               userAccount?.freeVotedNames.includes(suggestion.id) ? 'Used' : 'Free'}
-                            </button>
-                            
-                            {/* Paid Vote Button */}
-                            <button
-                              onClick={() => handleVote(suggestion.id, true)}
-                              disabled={!connected || !isRegistered || !userAccount?.paidVotesOwned}
-                              className={`flex items-center gap-1 px-4 py-2 rounded-xl font-semibold transition-all text-sm ${
-                                !connected || !isRegistered || !userAccount?.paidVotesOwned
-                                  ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
-                                  : 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-400 hover:to-red-400 transform hover:scale-105 shadow-lg'
-                              }`}
-                              title={!connected ? 'Connect wallet to vote' : !isRegistered ? 'Register to vote' : !userAccount?.paidVotesOwned ? 'Buy vote packs to use paid votes' : ''}
-                            >
-                              <Crown size={14} />
-                              Paid
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8">
-                    <div className="text-white/60 mb-2">No name suggestions yet!</div>
-                    <div className="text-white/80 text-sm">
-                      {connected ? 'Be the first to suggest a name for Geomi!' : 'Connect your wallet to suggest the first name!'}
-                    </div>
-                  </div>
-                )}
+              <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg">
+                <p className="text-gray-700 text-center">
+                  <strong>How it works:</strong> Buy votes to boost your favorite names! 
+                  Use multiple paid votes on the same name for maximum impact! 🏆
+                </p>
+                <p className="text-gray-600 text-center mt-2 text-sm">
+                  Free votes: 1 per name • Paid votes: unlimited per name
+                </p>
+                <p className="text-gray-600 text-center mt-2">
+                  Your balance: <strong>{accountBalance.toFixed(2)} APT</strong>
+                </p>
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* Vote Store Modal */}
-        {showVoteStore && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-xl">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                    <DollarSign className="text-green-500" size={24} />
-                    Vote Store
-                  </h2>
-                  <button
-                    onClick={() => setShowVoteStore(false)}
-                    className="text-gray-500 hover:text-gray-700 text-2xl"
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                {VOTE_PACKS.map((pack) => (
+                  <div
+                    key={pack.id}
+                    className={`p-4 rounded-lg border-2 transition-all hover:shadow-lg ${
+                      pack.popular
+                        ? 'border-yellow-400 bg-gradient-to-br from-yellow-50 to-orange-50'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
                   >
-                    ×
-                  </button>
-                </div>
-                
-                <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg">
-                  <p className="text-gray-700 text-center">
-                    <strong>How it works:</strong> Buy votes to boost your favorite names! 
-                    Use multiple paid votes on the same name for maximum impact! 🏆
-                  </p>
-                  <p className="text-gray-600 text-center mt-2 text-sm">
-                    Free votes: 1 per name • Paid votes: unlimited per name
-                  </p>
-                  <p className="text-gray-600 text-center mt-2">
-                    Your balance: <strong>{accountBalance.toFixed(2)} APT</strong>
-                  </p>
-                </div>
-                
-                <div className="grid md:grid-cols-2 gap-4">
-                  {VOTE_PACKS.map((pack) => (
-                    <div
-                      key={pack.id}
-                      className={`p-4 rounded-lg border-2 transition-all hover:shadow-lg ${
-                        pack.popular
-                          ? 'border-yellow-400 bg-gradient-to-br from-yellow-50 to-orange-50'
-                          : 'border-gray-200 bg-white hover:border-gray-300'
-                      }`}
-                    >
-                      {pack.popular && (
-                        <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded-full mb-2 inline-block">
-                          MOST POPULAR
-                        </div>
-                      )}
-                      <h3 className="font-bold text-lg text-gray-800 mb-2">{pack.name}</h3>
-                      <div className="text-3xl font-bold text-gray-800 mb-2">{pack.votes} votes</div>
-                      <div className="text-2xl font-bold text-green-600 mb-4">{pack.aptPrice ?? pack.price} APT</div>
-                      <div className="text-sm text-gray-600 mb-4">
-                        {((pack.aptPrice ?? pack.price) / pack.votes).toFixed(2)} APT per vote
+                    {pack.popular && (
+                      <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded-full mb-2 inline-block">
+                        MOST POPULAR
                       </div>
-                      <button
-                        onClick={() => handlePurchase(pack)}
-                        disabled={!connected || !isRegistered || accountBalance < (pack.aptPrice ?? pack.price)}
-                        className="w-full geomi-btn-primary disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95"
-                      >
-                        {!connected ? 'Connect Wallet' :
-                         !isRegistered ? 'Register First' :
-                         accountBalance < (pack.aptPrice ?? pack.price) ? 'Insufficient Balance' : 'Purchase Now'}
-                      </button>
+                    )}
+                    <h3 className="font-bold text-lg text-gray-800 mb-2">{pack.name}</h3>
+                    <div className="text-3xl font-bold text-gray-800 mb-2">{pack.votes} votes</div>
+                    <div className="text-2xl font-bold text-green-600 mb-4">{pack.aptPrice ?? pack.price} APT</div>
+                    <div className="text-sm text-gray-600 mb-4">
+                      {((pack.aptPrice ?? pack.price) / pack.votes).toFixed(2)} APT per vote
                     </div>
-                  ))}
-                </div>
+                    <button
+                      onClick={() => handlePurchase(pack)}
+                      disabled={!connected || !isRegistered || accountBalance < (pack.aptPrice ?? pack.price)}
+                      className="w-full bw-btn-primary disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95"
+                    >
+                      {!connected ? 'Connect Wallet' :
+                       !isRegistered ? 'Register First' :
+                       accountBalance < (pack.aptPrice ?? pack.price) ? 'Insufficient Balance' : 'Purchase Now'}
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
-        )}
-
-        {/* Footer */}
-        <div className="text-center mt-8 text-white/70">
-          <p>
-            {suggestions.length} name{suggestions.length !== 1 ? 's' : ''} suggested • 
-            Total votes: {suggestions.reduce((sum, s) => sum + s.totalVotes, 0)} • 
-            Prize pool: {prizePool.total.toFixed(2)} APT
-          </p>
         </div>
+      )}
+
+      {/* Footer */}
+      <div className="text-center mt-8 text-white/70">
+        <p>
+          {suggestions.length} name{suggestions.length !== 1 ? 's' : ''} suggested • 
+          Total votes: {suggestions.reduce((sum, s) => sum + s.totalVotes, 0)} • 
+          Prize pool: {prizePool.total.toFixed(2)} APT
+        </p>
       </div>
     </div>
   );
