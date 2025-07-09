@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useWallet } from '@aptos-labs/wallet-adapter-react';
 import { 
   Plus, 
@@ -53,19 +53,7 @@ export default function Home() {
   const [accountBalance, setAccountBalance] = useState(0);
   const [status, setStatus] = useState<string>('');
 
-  useEffect(() => {
-    if (connected && account) {
-      loadData();
-    } else {
-      setSuggestions([]);
-      setUserAccount(null);
-      setIsRegistered(false);
-      setPrizePool({ total: 0, contributors: 0 });
-      setAccountBalance(0);
-    }
-  }, [connected, account]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!account) return;
 
     try {
@@ -74,7 +62,7 @@ export default function Home() {
 
       const [totalPrize, contributors] = await getPrizePool();
       setPrizePool({ 
-        total: totalPrize / 100000000,
+        total: totalPrize, // Already converted to APT in blockchain service
         contributors 
       });
 
@@ -92,7 +80,19 @@ export default function Home() {
       console.error('Error loading data:', error);
       setStatus('Error loading data. Contract may not be deployed.');
     }
-  };
+  }, [account]);
+
+  useEffect(() => {
+    if (connected && account) {
+      loadData();
+    } else {
+      setSuggestions([]);
+      setUserAccount(null);
+      setIsRegistered(false);
+      setPrizePool({ total: 0, contributors: 0 });
+      setAccountBalance(0);
+    }
+  }, [connected, account, loadData]);
 
   const handleRegister = async () => {
     if (!account || !signAndSubmitTransaction) return;
@@ -181,7 +181,7 @@ export default function Home() {
   const InstructionsTab = () => (
     <div className="max-w-4xl mx-auto">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-4">How to Vote for Geomi's Name</h1>
+        <h1 className="text-3xl font-bold mb-4">How to Vote for Geomi&apos;s Name</h1>
         <p className="text-lg">Complete guide to participating in our mascot naming contest</p>
       </div>
 
@@ -290,7 +290,7 @@ export default function Home() {
         {/* Header */}
         <div className="flex items-start justify-between py-6">
           <div className="flex-1 text-center">
-            <h1 className="text-4xl font-bold mb-4">Name Our Mascot "Geomi"!</h1>
+            <h1 className="text-4xl font-bold mb-4">Name Our Mascot &quot;Geomi&quot;!</h1>
             <p className="text-lg mb-6">Join our community in choosing the perfect name for our beloved mascot!</p>
           </div>
           <div className="flex-shrink-0">
