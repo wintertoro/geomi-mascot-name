@@ -2,7 +2,13 @@ import type { Metadata } from "next";
 import { Inter, Fredoka } from "next/font/google";
 import "./globals.css";
 import "@aptos-labs/wallet-adapter-ant-design/dist/index.css";
-import { WalletProvider } from "./components/WalletProvider";
+import dynamic from "next/dynamic";
+
+// Dynamically import WalletProvider to prevent SSR issues
+const WalletProvider = dynamic(
+  () => import("./components/WalletProvider"),
+  { ssr: false }
+);
 
 const inter = Inter({
   variable: "--font-inter",

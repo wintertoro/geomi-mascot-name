@@ -2,6 +2,10 @@
 
 import { useState, useEffect } from 'react';
 
+// Force dynamic rendering - prevent static generation
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default function App() {
   const [isClient, setIsClient] = useState(false);
 

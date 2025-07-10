@@ -24,62 +24,6 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // Enable webpack optimizations
-  webpack: (config, { dev, isServer }) => {
-    // Production optimizations
-    if (!dev) {
-      config.optimization = {
-        ...config.optimization,
-        usedExports: true,
-        sideEffects: false,
-        splitChunks: {
-          chunks: 'all',
-          minSize: 20000,
-          maxSize: 244000,
-          cacheGroups: {
-            vendor: {
-              test: /[\\/]node_modules[\\/]/,
-              name: 'vendors',
-              chunks: 'all',
-              priority: 10,
-              reuseExistingChunk: true,
-            },
-            common: {
-              minChunks: 2,
-              chunks: 'all',
-              name: 'common',
-              priority: 5,
-              reuseExistingChunk: true,
-            },
-          },
-        },
-      };
-      
-      // Aggressive module resolution for smaller bundles
-      config.resolve.alias = {
-        ...config.resolve.alias,
-      };
-    }
-    
-    // Development optimizations
-    if (dev) {
-      config.watchOptions = {
-        poll: 1000,
-        aggregateTimeout: 300,
-        ignored: ['**/node_modules', '**/.git', '**/.next'],
-      };
-      
-      // Faster compilation in dev
-      config.cache = {
-        type: 'filesystem',
-        buildDependencies: {
-          config: [__filename],
-        },
-      };
-    }
-    
-    return config;
-  },
   // Disable static optimization to prevent SSR issues with wallet components
   generateEtags: false,
   // Disable static optimization
@@ -105,6 +49,9 @@ const nextConfig = {
   pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
   // Disable source maps in production for faster builds
   productionBrowserSourceMaps: false,
+  // Force dynamic rendering for all pages
+  poweredByHeader: false,
+  reactStrictMode: true,
 };
 
 module.exports = nextConfig; 

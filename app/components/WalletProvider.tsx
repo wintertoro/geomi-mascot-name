@@ -4,7 +4,7 @@ import { type PropsWithChildren, useEffect, useState } from "react";
 import { AptosWalletAdapterProvider } from "@aptos-labs/wallet-adapter-react";
 import { Network } from "@aptos-labs/ts-sdk";
 
-export const WalletProvider = ({ children }: PropsWithChildren) => {
+const WalletProvider = ({ children }: PropsWithChildren) => {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -32,4 +32,6 @@ export const WalletProvider = ({ children }: PropsWithChildren) => {
       {children}
     </AptosWalletAdapterProvider>
   );
-}; 
+};
+
+export default WalletProvider; 
