@@ -1,7 +1,6 @@
 'use client';
 
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import { WalletSelector } from "@aptos-labs/wallet-adapter-ant-design";
 import { Wallet } from "./Icons";
 
 export const WalletConnection = () => {
@@ -24,7 +23,9 @@ export const WalletConnection = () => {
         </div>
       )}
       
-      <WalletSelector />
+      <button className="glass-button primary">
+        {connected ? 'Disconnect' : 'Connect Wallet'}
+      </button>
     </div>
   );
 }; 

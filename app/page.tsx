@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useWallet } from '@aptos-labs/wallet-adapter-react';
+import { useState } from 'react';
 import { 
   Plus, 
   Trophy, 
@@ -12,271 +11,51 @@ import {
   CheckCircle,
   Coins
 } from './components/Icons';
-import { WalletConnection } from './components/WalletConnection';
-import { MainTab } from './components/MainTab';
-import { LeaderboardTab } from './components/LeaderboardTab';
-import { VoteStoreTab } from './components/VoteStoreTab';
 import { GitHubLink } from './components/GitHubLink';
-import { 
-  registerUser, 
-  suggestName, 
-  castVote, 
-  purchaseVotePack, 
-  getSuggestions, 
-  getUserAccount, 
-  getPrizePool,
-  getAccountBalance,
-  type NameSuggestion,
-  type UserAccount,
-  type VotePack 
-} from './services/blockchain';
 
-const VOTE_PACKS: VotePack[] = [
-  { id: 'starter', name: 'Starter Pack', votes: 5, price: 5, aptPrice: 5 },
-  { id: 'booster', name: 'Booster Pack', votes: 12, price: 10, aptPrice: 10, popular: true },
-  { id: 'power', name: 'Power Pack', votes: 25, price: 20, aptPrice: 20 },
-  { id: 'champion', name: 'Champion Pack', votes: 60, price: 45, aptPrice: 45 },
-];
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
 
 type TabType = 'main' | 'leaderboard' | 'instructions' | 'store';
 
 export default function Home() {
-  const { account, connected, signAndSubmitTransaction } = useWallet();
   const [activeTab, setActiveTab] = useState<TabType>('main');
-  const [suggestions, setSuggestions] = useState<NameSuggestion[]>([]);
-  const [userAccount, setUserAccount] = useState<UserAccount | null>(null);
-  const [newName, setNewName] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isRegistered, setIsRegistered] = useState(false);
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [prizePool, setPrizePool] = useState({ total: 0, contributors: 0 });
-  const [accountBalance, setAccountBalance] = useState(0);
-  const [status, setStatus] = useState<string>('');
 
-  const loadData = useCallback(async () => {
-    if (!account) return;
-
-    try {
-      const suggestionsData = await getSuggestions();
-      setSuggestions(suggestionsData);
-
-      const [totalPrize, contributors] = await getPrizePool();
-      setPrizePool({ 
-        total: totalPrize, // Already converted to APT in blockchain service
-        contributors 
-      });
-
-      const balance = await getAccountBalance(account.address.toString());
-      setAccountBalance(balance);
-
-      try {
-        const userAccountData = await getUserAccount(account.address.toString());
-        setUserAccount(userAccountData);
-        setIsRegistered(true);
-      } catch (error) {
-        setIsRegistered(false);
-      }
-    } catch (error) {
-      console.error('Error loading data:', error);
-      setStatus('Error loading data. Contract may not be deployed.');
-    }
-  }, [account]);
-
-  useEffect(() => {
-    if (connected && account) {
-      loadData();
-    } else {
-      setSuggestions([]);
-      setUserAccount(null);
-      setIsRegistered(false);
-      setPrizePool({ total: 0, contributors: 0 });
-      setAccountBalance(0);
-    }
-  }, [connected, account, loadData]);
-
-  const handleRegister = async () => {
-    if (!account || !signAndSubmitTransaction) return;
-    
-    setIsRegistering(true);
-    setStatus('Registering user...');
-    
-    try {
-      await registerUser(account.address.toString(), signAndSubmitTransaction);
-      await loadData();
-      setStatus('Registration successful! You have 1 free vote.');
-    } catch (error) {
-      console.error('Registration failed:', error);
-      setStatus('Registration failed. Please try again.');
-    } finally {
-      setIsRegistering(false);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newName.trim() || !account || !userAccount || !signAndSubmitTransaction) return;
-    
-    setIsSubmitting(true);
-    setStatus('Submitting name suggestion...');
-    
-    try {
-      await suggestName(account.address.toString(), newName.trim(), signAndSubmitTransaction);
-      setNewName('');
-      await loadData();
-      setStatus('Name suggestion submitted successfully!');
-    } catch (error) {
-      console.error('Submission failed:', error);
-      setStatus('Submission failed. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleVote = async (suggestionId: string, isPaidVote: boolean) => {
-    if (!account || !userAccount || !signAndSubmitTransaction) return;
-    
-    if (isPaidVote && userAccount.paidVotesOwned === 0) {
-      setStatus('No paid votes available. Purchase vote packs to continue.');
-      return;
-    }
-    
-    if (!isPaidVote && userAccount.freeVotesRemaining === 0) {
-      setStatus('No free votes remaining.');
-      return;
-    }
-
-    if (!isPaidVote && userAccount.freeVotedNames.includes(suggestionId)) {
-      setStatus('You already used your free vote on this name.');
-      return;
-    }
-    
-    setStatus(isPaidVote ? 'Casting paid vote...' : 'Casting free vote...');
-    
-    try {
-      await castVote(account.address.toString(), parseInt(suggestionId), isPaidVote, signAndSubmitTransaction);
-      await loadData();
-      setStatus(`${isPaidVote ? 'Paid' : 'Free'} vote cast successfully!`);
-    } catch (error) {
-      console.error('Vote failed:', error);
-      setStatus('Vote failed. Please try again.');
-    }
-  };
-
-  const handlePurchase = async (pack: VotePack) => {
-    if (!account || !signAndSubmitTransaction) return;
-    
-    const price = pack.aptPrice ?? pack.price;
-    setStatus(`Purchasing ${pack.name}...`);
-    
-    try {
-      await purchaseVotePack(account.address.toString(), pack.id, price, signAndSubmitTransaction);
-      await loadData();
-      setStatus(`${pack.name} purchased successfully!`);
-    } catch (error) {
-      console.error('Purchase failed:', error);
-      setStatus('Purchase failed. Please check your balance and try again.');
-    }
-  };
-
-  const InstructionsTab = () => (
-    <div className="max-w-4xl mx-auto">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-4">How to Vote for Geomi&apos;s Name</h1>
-        <p className="text-lg">Complete guide to participating in our mascot naming contest</p>
+  const MainContent = () => (
+    <div className="max-w-4xl mx-auto space-y-8">
+      <div className="glass-card p-6 text-center">
+        <h3 className="text-xl font-bold mb-4">Coming Soon!</h3>
+        <p className="mb-4">The Geomi Mascot Name Voting dApp is under development.</p>
+        <p className="text-sm text-gray-600">
+          This will be a blockchain-based voting system where you can suggest names for our mascot Geomi and vote for your favorites using Aptos blockchain.
+        </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6 mb-8">
-        {/* Getting Started */}
-        <div className="glass-card p-6">
-          <h2 className="text-xl font-bold mb-4">Getting Started</h2>
-          <div className="space-y-3">
-            <div className="flex items-start gap-3">
-              <CheckCircle size={16} className="mt-1" />
-              <div>
-                <strong>Connect Wallet:</strong> Use your Aptos wallet to participate
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <CheckCircle size={16} className="mt-1" />
-              <div>
-                <strong>Register:</strong> Get your free vote by registering
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <CheckCircle size={16} className="mt-1" />
-              <div>
-                <strong>Participate:</strong> Suggest names and vote for favorites
-              </div>
+      <div className="glass-card p-6">
+        <h2 className="text-2xl font-bold mb-4">What You&apos;ll Be Able to Do:</h2>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="flex items-start gap-3">
+            <Plus size={16} className="mt-1" />
+            <div>
+              <strong>Suggest Names:</strong> Submit creative names for our mascot
             </div>
           </div>
-        </div>
-
-        {/* Voting Rules */}
-        <div className="glass-card p-6">
-          <h2 className="text-xl font-bold mb-4">Voting Rules</h2>
-          <div className="space-y-3">
-            <div className="flex items-start gap-3">
-              <Star size={16} className="mt-1" />
-              <div>
-                <strong>Free Votes:</strong> One free vote per name
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <Crown size={16} className="mt-1" />
-              <div>
-                <strong>Paid Votes:</strong> Unlimited paid votes per name
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <Target size={16} className="mt-1" />
-              <div>
-                <strong>Strategy:</strong> Use multiple paid votes on favorites
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <CheckCircle size={16} className="mt-1" />
-              <div>
-                <strong>Important:</strong> Votes cannot be removed once cast
-              </div>
+          <div className="flex items-start gap-3">
+            <Star size={16} className="mt-1" />
+            <div>
+              <strong>Vote for Favorites:</strong> Support the names you love
             </div>
           </div>
-        </div>
-
-        {/* Vote Packs */}
-        <div className="glass-card p-6">
-          <h2 className="text-xl font-bold mb-4">Vote Packs</h2>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span>Starter Pack:</span>
-              <span className="font-bold">5 votes for 5 APT</span>
-            </div>
-            <div className="flex justify-between border border-black p-1 rounded">
-              <span>Booster Pack:</span>
-              <span className="font-bold">12 votes for 10 APT ⭐</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Power Pack:</span>
-              <span className="font-bold">25 votes for 20 APT</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Champion Pack:</span>
-              <span className="font-bold">60 votes for 45 APT</span>
+          <div className="flex items-start gap-3">
+            <Coins size={16} className="mt-1" />
+            <div>
+              <strong>Purchase Vote Packs:</strong> Get more voting power
             </div>
           </div>
-        </div>
-
-        {/* Prize Pool */}
-        <div className="glass-card p-6">
-          <h2 className="text-xl font-bold mb-4">Prize Pool</h2>
-          <div className="space-y-3">
+          <div className="flex items-start gap-3">
+            <Trophy size={16} className="mt-1" />
             <div>
-              <strong>How it Grows:</strong> All APT from vote packs goes to prize pool
-            </div>
-            <div>
-              <strong>Winner Takes All:</strong> Most voted name wins entire pool
-            </div>
-            <div>
-              <strong>Current Pool:</strong> {prizePool.total.toFixed(2)} APT
+              <strong>Win Prizes:</strong> Prize pool for the winning name
             </div>
           </div>
         </div>
@@ -285,137 +64,86 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen bw-gradient p-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+      <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-start justify-between py-6">
-          <div className="flex-1 text-center">
-            <h1 className="text-4xl font-bold mb-4">Name Our Mascot &quot;Geomi&quot;!</h1>
-            <p className="text-lg mb-6">Join our community in choosing the perfect name for our beloved mascot!</p>
+        <div className="text-center mb-8">
+          <div className="glass-card p-6 mb-6">
+            <h1 className="text-4xl font-bold mb-2">🎭 Geomi Mascot Name Voting</h1>
+            <p className="text-lg text-gray-600">Help us choose the perfect name for our beloved mascot!</p>
           </div>
-          <div className="flex-shrink-0">
-            <WalletConnection />
-          </div>
-        </div>
-
-        {/* Tab Navigation */}
-        <div className="flex justify-center mb-8">
-          <div className="flex gap-1 border-2 border-black rounded-lg p-1 flex-wrap">
+          
+          {/* Navigation */}
+          <nav className="flex justify-center space-x-4 mb-8">
             <button
               onClick={() => setActiveTab('main')}
-              className={activeTab === 'main' ? 'tab-active' : 'tab-inactive'}
+              className={`glass-button ${activeTab === 'main' ? 'active' : ''}`}
             >
-              <Plus size={16} />
-              Submit & Vote
+              <Plus size={16} className="mr-2" />
+              Main
             </button>
             <button
               onClick={() => setActiveTab('leaderboard')}
-              className={activeTab === 'leaderboard' ? 'tab-active' : 'tab-inactive'}
+              className={`glass-button ${activeTab === 'leaderboard' ? 'active' : ''}`}
             >
-              <Trophy size={16} />
+              <Trophy size={16} className="mr-2" />
               Leaderboard
             </button>
             <button
-              onClick={() => setActiveTab('store')}
-              className={activeTab === 'store' ? 'tab-active' : 'tab-inactive'}
+              onClick={() => setActiveTab('instructions')}
+              className={`glass-button ${activeTab === 'instructions' ? 'active' : ''}`}
             >
-              <Coins size={16} />
-              Buy Votes
+              <BookOpen size={16} className="mr-2" />
+              Instructions
             </button>
             <button
-              onClick={() => setActiveTab('instructions')}
-              className={activeTab === 'instructions' ? 'tab-active' : 'tab-inactive'}
+              onClick={() => setActiveTab('store')}
+              className={`glass-button ${activeTab === 'store' ? 'active' : ''}`}
             >
-              <BookOpen size={16} />
-              How to Play
+              <Coins size={16} className="mr-2" />
+              Vote Store
             </button>
-          </div>
+          </nav>
         </div>
 
-        {/* Status Section */}
-        {activeTab !== 'instructions' && (
-          <div className="mb-8">
-            {/* User Stats */}
-            {connected && account && userAccount && (
-              <div className="flex flex-wrap justify-center gap-4 mb-6">
-                <div className="status-badge active">
-                  Balance: {accountBalance.toFixed(2)} APT
-                </div>
-                <div className="status-badge inactive">
-                  Free Votes: {userAccount.freeVotesRemaining}
-                </div>
-                <div className="status-badge inactive">
-                  Paid Votes: {userAccount.paidVotesOwned}
-                </div>
-              </div>
-            )}
-
-            {/* Status Message */}
-            {status && (
-              <div className="glass-card max-w-2xl mx-auto mb-6 p-4">
-                <p className="text-center">{status}</p>
-              </div>
-            )}
-
-            {/* Prize Pool */}
-            <div className="prize-pool max-w-4xl mx-auto mb-8">
-              <h2 className="text-2xl font-bold mb-2">Prize Pool</h2>
-              <p className="text-4xl font-bold mb-2">{prizePool.total.toFixed(2)} APT</p>
-              <div className="flex items-center justify-center gap-4 text-sm">
-                <span>{prizePool.contributors} contributors</span>
-                <span>Winner takes all!</span>
+        {/* Main Content */}
+        <main>
+          {activeTab === 'main' && <MainContent />}
+          {activeTab === 'leaderboard' && (
+            <div className="max-w-4xl mx-auto">
+              <div className="glass-card p-6">
+                <h2 className="text-2xl font-bold mb-4">Leaderboard</h2>
+                <p className="text-gray-600">Name suggestions and voting results will appear here when the system is live.</p>
               </div>
             </div>
-          </div>
-        )}
+          )}
+          {activeTab === 'instructions' && (
+            <div className="max-w-4xl mx-auto">
+              <div className="glass-card p-6">
+                <h2 className="text-2xl font-bold mb-4">How to Vote</h2>
+                <p className="text-gray-600">Complete instructions for participating in the voting will be available when the system launches.</p>
+              </div>
+            </div>
+          )}
+          {activeTab === 'store' && (
+            <div className="max-w-4xl mx-auto">
+              <div className="glass-card p-6">
+                <h2 className="text-2xl font-bold mb-4">Vote Store</h2>
+                <p className="text-gray-600">Vote packs will be available for purchase when the system is live.</p>
+              </div>
+            </div>
+          )}
+        </main>
 
-        {/* Tab Content */}
-        {activeTab === 'instructions' ? (
-          <InstructionsTab />
-        ) : activeTab === 'leaderboard' ? (
-          <LeaderboardTab
-            suggestions={suggestions}
-            connected={connected}
-            isRegistered={isRegistered}
-            userAccount={userAccount}
-            handleVote={handleVote}
-          />
-        ) : activeTab === 'store' ? (
-          <VoteStoreTab
-            connected={connected}
-            isRegistered={isRegistered}
-            accountBalance={accountBalance}
-            handlePurchase={handlePurchase}
-          />
-        ) : (
-          <MainTab
-            connected={connected}
-            isRegistered={isRegistered}
-            isRegistering={isRegistering}
-            newName={newName}
-            setNewName={setNewName}
-            isSubmitting={isSubmitting}
-            userAccount={userAccount}
-            suggestions={suggestions}
-            setActiveTab={setActiveTab}
-            handleRegister={handleRegister}
-            handleSubmit={handleSubmit}
-          />
-        )}
-      </div>
-
-      {/* Footer */}
-      <div className="text-center mt-16 pb-8">
-        <div className="glass-card max-w-3xl mx-auto p-4">
-          <div className="flex flex-wrap justify-center gap-6 text-sm mb-4">
-            <span>{suggestions.length} names suggested</span>
-            <span>{suggestions.reduce((sum, s) => sum + s.totalVotes, 0)} total votes</span>
-            <span>{prizePool.total.toFixed(2)} APT prize pool</span>
+        {/* Footer */}
+        <footer className="mt-12 text-center">
+          <div className="glass-card p-4">
+            <div className="flex justify-center items-center space-x-4">
+              <GitHubLink />
+              <span className="text-sm text-gray-600">Built with Next.js & Aptos</span>
+            </div>
           </div>
-          <div className="flex justify-center">
-            <GitHubLink />
-          </div>
-        </div>
+        </footer>
       </div>
     </div>
   );
