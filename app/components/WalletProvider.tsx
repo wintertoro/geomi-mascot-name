@@ -18,9 +18,12 @@ const WalletProvider = ({ children }: PropsWithChildren) => {
 
   return (
     <AptosWalletAdapterProvider
-      autoConnect={true}
+      autoConnect={false}
       dappConfig={{ 
         network: Network.TESTNET,
+        // Configure multiple popular wallets
+        aptosConnectDappId: "57fa42a9-29c6-4f1e-939c-4eefa36d9ff5",
+        // Add manifest for Mizu wallet
         mizuwallet: {
           manifestURL: "https://assets.mizu.io/wallet/manifest.json",
         },

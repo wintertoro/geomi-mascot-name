@@ -56,12 +56,42 @@ class BlockchainService {
     const config = new AptosConfig({ network: Network.TESTNET });
     this.aptos = new Aptos(config);
     
+    // Debug logging
+    console.log('Environment check:', {
+      NODE_ENV: process.env.NODE_ENV,
+      NEXT_PUBLIC_CONTRACT_ADDRESS: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
+      typeof_window: typeof window,
+      all_env_vars: Object.keys(process.env).filter(key => key.startsWith('NEXT_PUBLIC_'))
+    });
+    
     // Validate contract address
     this.contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "";
     if (!this.contractAddress) {
       console.error('NEXT_PUBLIC_CONTRACT_ADDRESS environment variable is not set');
+      console.error('Available NEXT_PUBLIC_ variables:', Object.keys(process.env).filter(key => key.startsWith('NEXT_PUBLIC_')));
       // In development, we can continue but all blockchain calls will fail gracefully
+    } else {
+      console.log('Contract address loaded successfully:', this.contractAddress);
     }
+  }
+
+  // Check if the service is properly configured
+  isConfigured(): boolean {
+    return !!this.contractAddress;
+  }
+
+  // Get configuration status for debugging
+  getConfigurationStatus(): { configured: boolean; contractAddress?: string; error?: string } {
+    if (this.contractAddress) {
+      return {
+        configured: true,
+        contractAddress: this.contractAddress
+      };
+    }
+    return {
+      configured: false,
+      error: 'Contract address not set. Please check NEXT_PUBLIC_CONTRACT_ADDRESS environment variable.'
+    };
   }
 
   // Initialize the voting system (admin only)
@@ -114,7 +144,9 @@ class BlockchainService {
     signAndSubmitTransaction: (transaction: any) => Promise<any>
   ): Promise<string> {
     if (!this.contractAddress) {
-      throw new Error('Contract address is not configured. Please set NEXT_PUBLIC_CONTRACT_ADDRESS environment variable.');
+      const configStatus = this.getConfigurationStatus();
+      console.error('Contract configuration error:', configStatus);
+      throw new Error(`Contract not configured. ${configStatus.error} Current environment: ${process.env.NODE_ENV}`);
     }
 
     const transaction = await this.aptos.transaction.build.simple({

@@ -64,7 +64,16 @@ export default function AppContent() {
   useEffect(() => {
     // Only load on client-side to prevent SSR issues
     if (typeof window !== 'undefined') {
-      loadSuggestions();
+      // Check blockchain service configuration
+      const configStatus = blockchainService.getConfigurationStatus();
+      console.log('Blockchain service configuration:', configStatus);
+      
+      if (configStatus.configured) {
+        console.log('✅ Blockchain service is properly configured');
+        loadSuggestions();
+      } else {
+        console.error('❌ Blockchain service configuration error:', configStatus.error);
+      }
     }
   }, [loadSuggestions]);
 
@@ -204,6 +213,15 @@ export default function AppContent() {
           {/* Wallet Connection */}
           <div className="mt-4 flex justify-center">
             <WalletConnection />
+          </div>
+          
+          {/* Configuration Status */}
+          <div className="mt-2 text-xs text-center">
+            {blockchainService.isConfigured() ? (
+              <span className="text-green-600">✅ Blockchain service connected</span>
+            ) : (
+              <span className="text-red-600">❌ Blockchain service not configured</span>
+            )}
           </div>
         </div>
 
