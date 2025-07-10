@@ -51,10 +51,18 @@ export const VOTE_PACKS: VotePack[] = [
 class BlockchainService {
   private aptos: Aptos;
   private contractAddress: string;
+  private initialized: boolean = false;
 
   constructor() {
     const config = new AptosConfig({ network: Network.TESTNET });
     this.aptos = new Aptos(config);
+    this.contractAddress = "";
+    // Don't initialize immediately - wait for client-side
+  }
+
+  // Lazy initialization for client-side
+  private ensureInitialized() {
+    if (this.initialized) return;
     
     // Debug logging
     console.log('Environment check:', {
@@ -73,15 +81,20 @@ class BlockchainService {
     } else {
       console.log('Contract address loaded successfully:', this.contractAddress);
     }
+    
+    this.initialized = true;
   }
 
   // Check if the service is properly configured
   isConfigured(): boolean {
+    this.ensureInitialized();
     return !!this.contractAddress;
   }
 
   // Get configuration status for debugging
   getConfigurationStatus(): { configured: boolean; contractAddress?: string; error?: string } {
+    this.ensureInitialized();
+    
     if (this.contractAddress) {
       return {
         configured: true,
@@ -100,8 +113,12 @@ class BlockchainService {
     votingDurationSeconds: number,
     signAndSubmitTransaction: (transaction: any) => Promise<any>
   ): Promise<string> {
+    this.ensureInitialized();
+    
     if (!this.contractAddress) {
-      throw new Error('Contract address is not configured. Please set NEXT_PUBLIC_CONTRACT_ADDRESS environment variable.');
+      const configStatus = this.getConfigurationStatus();
+      console.error('Contract configuration error:', configStatus);
+      throw new Error(`Contract not configured. ${configStatus.error} Current environment: ${process.env.NODE_ENV}`);
     }
 
     const transaction = await this.aptos.transaction.build.simple({
@@ -121,8 +138,12 @@ class BlockchainService {
     userAddress: string,
     signAndSubmitTransaction: (transaction: any) => Promise<any>
   ): Promise<string> {
+    this.ensureInitialized();
+    
     if (!this.contractAddress) {
-      throw new Error('Contract address is not configured. Please set NEXT_PUBLIC_CONTRACT_ADDRESS environment variable.');
+      const configStatus = this.getConfigurationStatus();
+      console.error('Contract configuration error:', configStatus);
+      throw new Error(`Contract not configured. ${configStatus.error} Current environment: ${process.env.NODE_ENV}`);
     }
 
     const transaction = await this.aptos.transaction.build.simple({
@@ -143,6 +164,8 @@ class BlockchainService {
     name: string,
     signAndSubmitTransaction: (transaction: any) => Promise<any>
   ): Promise<string> {
+    this.ensureInitialized();
+    
     if (!this.contractAddress) {
       const configStatus = this.getConfigurationStatus();
       console.error('Contract configuration error:', configStatus);
@@ -168,8 +191,12 @@ class BlockchainService {
     isBoostVote: boolean,
     signAndSubmitTransaction: (transaction: any) => Promise<any>
   ): Promise<string> {
+    this.ensureInitialized();
+    
     if (!this.contractAddress) {
-      throw new Error('Contract address is not configured. Please set NEXT_PUBLIC_CONTRACT_ADDRESS environment variable.');
+      const configStatus = this.getConfigurationStatus();
+      console.error('Contract configuration error:', configStatus);
+      throw new Error(`Contract not configured. ${configStatus.error} Current environment: ${process.env.NODE_ENV}`);
     }
 
     const transaction = await this.aptos.transaction.build.simple({
@@ -194,8 +221,12 @@ class BlockchainService {
     aptAmount: number,
     signAndSubmitTransaction: (transaction: any) => Promise<any>
   ): Promise<string> {
+    this.ensureInitialized();
+    
     if (!this.contractAddress) {
-      throw new Error('Contract address is not configured. Please set NEXT_PUBLIC_CONTRACT_ADDRESS environment variable.');
+      const configStatus = this.getConfigurationStatus();
+      console.error('Contract configuration error:', configStatus);
+      throw new Error(`Contract not configured. ${configStatus.error} Current environment: ${process.env.NODE_ENV}`);
     }
 
     const octasAmount = aptAmount * 100000000; // Convert APT to octas
@@ -217,6 +248,8 @@ class BlockchainService {
 
   // View functions
   async getSuggestions(): Promise<NameSuggestion[]> {
+    this.ensureInitialized();
+    
     if (!this.contractAddress) {
       console.error('Contract address is not configured. Please set NEXT_PUBLIC_CONTRACT_ADDRESS environment variable.');
       return [];
@@ -248,6 +281,8 @@ class BlockchainService {
   }
 
   async getUserAccount(userAddress: string): Promise<UserAccount | null> {
+    this.ensureInitialized();
+    
     if (!this.contractAddress) {
       console.error('Contract address is not configured. Please set NEXT_PUBLIC_CONTRACT_ADDRESS environment variable.');
       return null;
@@ -261,13 +296,15 @@ class BlockchainService {
         },
       });
 
-      const account = result[0] as any;
+      // Parse the result based on the expected structure
+      const accountData = result[0] as any;
+      
       return {
-        freeVotesRemaining: parseInt(account.free_votes_remaining),
-        boostVotesOwned: parseInt(account.boost_votes_owned),
-        totalSpent: parseInt(account.total_spent),
-        freeVotedNames: account.free_voted_names.map((id: any) => id.toString()),
-        suggestionsCount: parseInt(account.suggestions_count),
+        freeVotesRemaining: parseInt(accountData.freeVotesRemaining || '0'),
+        boostVotesOwned: parseInt(accountData.boostVotesOwned || '0'),
+        totalSpent: parseInt(accountData.totalSpent || '0'),
+        freeVotedNames: accountData.freeVotedNames || [],
+        suggestionsCount: parseInt(accountData.suggestionsCount || '0'),
       };
     } catch (error) {
       console.error('Error fetching user account:', error);
@@ -276,6 +313,8 @@ class BlockchainService {
   }
 
   async getPrizePool(): Promise<PrizePool> {
+    this.ensureInitialized();
+    
     if (!this.contractAddress) {
       console.error('Contract address is not configured. Please set NEXT_PUBLIC_CONTRACT_ADDRESS environment variable.');
       return { total: 0, contributors: 0 };
@@ -289,10 +328,10 @@ class BlockchainService {
         },
       });
 
-      const [total, contributors] = result as [string, string];
+      const poolData = result[0] as any;
       return {
-        total: parseInt(total) / 100000000, // Convert octas to APT
-        contributors: parseInt(contributors),
+        total: parseInt(poolData.total || '0'),
+        contributors: parseInt(poolData.contributors || '0'),
       };
     } catch (error) {
       console.error('Error fetching prize pool:', error);
@@ -301,6 +340,8 @@ class BlockchainService {
   }
 
   async getVotingEndTime(): Promise<number> {
+    this.ensureInitialized();
+    
     if (!this.contractAddress) {
       console.error('Contract address is not configured. Please set NEXT_PUBLIC_CONTRACT_ADDRESS environment variable.');
       return 0;
@@ -323,34 +364,40 @@ class BlockchainService {
 
   // Helper function to check if contract is deployed
   async isContractDeployed(): Promise<boolean> {
+    this.ensureInitialized();
+    
     if (!this.contractAddress) {
       console.error('Contract address is not configured. Please set NEXT_PUBLIC_CONTRACT_ADDRESS environment variable.');
       return false;
     }
-    
+
     try {
-      await this.getSuggestions();
+      await this.aptos.getAccountResources({
+        accountAddress: this.contractAddress,
+      });
       return true;
     } catch (error) {
-      console.error('Error checking contract deployment:', error);
+      console.error('Contract not deployed or accessible:', error);
       return false;
     }
   }
 
   // Get account balance
   async getAccountBalance(address: string): Promise<number> {
+    this.ensureInitialized();
+    
     try {
       const resources = await this.aptos.getAccountResources({
         accountAddress: address,
       });
       
-      const coinResource = resources.find(
-        (r) => r.type === "0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>"
+      const accountResource = resources.find(
+        (resource) => resource.type === "0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>"
       );
       
-      if (coinResource) {
-        const balance = (coinResource.data as any).coin.value;
-        return parseInt(balance) / 100000000; // Convert octas to APT
+      if (accountResource) {
+        const balance = (accountResource.data as any).coin.value;
+        return parseInt(balance) / 100000000; // Convert from octas to APT
       }
       
       return 0;

@@ -205,24 +205,25 @@ export default function AppContent() {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Top Bar with Wallet Connection */}
+        <div className="flex justify-end mb-6">
+          <div className="flex flex-col items-end gap-1">
+            <WalletConnection />
+            {/* Configuration Status */}
+            <div className="text-xs">
+              {blockchainService.isConfigured() ? (
+                <span className="text-green-600">✅ Blockchain service connected</span>
+              ) : (
+                <span className="text-red-600">❌ Blockchain service not configured</span>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Header */}
         <div className="text-center mb-8 border-b border-black pb-6">
           <h1 className="text-3xl font-bold mb-2 text-black">Name Geomi&apos;s Mascot</h1>
           <p className="text-black">Help choose the perfect name for our mascot</p>
-          
-          {/* Wallet Connection */}
-          <div className="mt-4 flex justify-center">
-            <WalletConnection />
-          </div>
-          
-          {/* Configuration Status */}
-          <div className="mt-2 text-xs text-center">
-            {blockchainService.isConfigured() ? (
-              <span className="text-green-600">✅ Blockchain service connected</span>
-            ) : (
-              <span className="text-red-600">❌ Blockchain service not configured</span>
-            )}
-          </div>
         </div>
 
         {/* Tab Navigation */}
