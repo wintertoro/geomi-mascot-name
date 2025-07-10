@@ -13,6 +13,13 @@ export default function App() {
         <div className="text-center mb-8 border-b border-black pb-6">
           <h1 className="text-3xl font-bold mb-2 text-black">Name Geomi&apos;s Mascot</h1>
           <p className="text-black">Help choose the perfect name for our mascot</p>
+          
+          {/* Wallet Connection Placeholder */}
+          <div className="mt-4 flex justify-center">
+            <div className="px-4 py-2 border border-black text-black">
+              Wallet connection coming soon
+            </div>
+          </div>
         </div>
 
         {/* Tab Navigation */}
@@ -21,16 +28,16 @@ export default function App() {
             { id: 'main', label: 'Suggest Names' },
             { id: 'leaderboard', label: 'Vote & Leaderboard' },
             { id: 'my-suggestions', label: 'My Suggestions' },
-            { id: 'store', label: 'Vote Store' },
+            { id: 'store', label: 'Buy Votes' },
             { id: 'instructions', label: 'How to Vote' },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`px-4 py-2 border border-black font-medium ${
+              className={`px-4 py-2 border border-black ${
                 activeTab === tab.id 
                   ? 'bg-black text-white' 
-                  : 'bg-white text-black hover:bg-gray-100'
+                  : 'bg-white text-black hover:bg-black hover:text-white'
               }`}
             >
               {tab.label}
@@ -42,44 +49,51 @@ export default function App() {
         <div className="border border-black p-6">
           {activeTab === 'main' && (
             <div>
-              <h2 className="text-2xl font-bold mb-4 text-black">Suggest a Name</h2>
-              <p className="text-black mb-6">
-                Help us choose the perfect name for our beloved mascot. You can suggest up to 10 names!
+              <h2 className="text-2xl font-bold mb-4 text-black">Suggest Names</h2>
+              <p className="text-black mb-4">
+                Help us choose the perfect name for our mascot! You can suggest up to 10 names.
               </p>
               <div className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Enter a creative name..."
-                  className="w-full px-4 py-2 border border-black focus:outline-none"
-                />
-                <button className="w-full bg-black text-white py-2 px-4 hover:bg-gray-800">
-                  Submit Name
+                <div>
+                  <label className="block text-black mb-2">Your Name Suggestion:</label>
+                  <input 
+                    type="text" 
+                    className="w-full p-2 border border-black"
+                    placeholder="Enter a creative name..."
+                  />
+                </div>
+                <button className="px-6 py-2 bg-black text-white hover:bg-gray-800">
+                  Submit Suggestion
                 </button>
+                <div className="mt-4 p-4 border border-black">
+                  <p className="text-black">
+                    <strong>Suggestions remaining:</strong> 10/10
+                  </p>
+                </div>
               </div>
             </div>
           )}
 
           {activeTab === 'leaderboard' && (
             <div>
-              <h2 className="text-2xl font-bold mb-4 text-black">Leaderboard</h2>
-              <p className="text-black">Vote for your favorite names and see which ones are winning!</p>
-              <div className="mt-6 space-y-2">
-                <div className="border border-black p-3">
-                  <div className="flex justify-between">
-                    <span className="font-medium">Sample Name 1</span>
-                    <span>42 votes</span>
-                  </div>
-                </div>
-                <div className="border border-black p-3">
-                  <div className="flex justify-between">
-                    <span className="font-medium">Sample Name 2</span>
-                    <span>38 votes</span>
-                  </div>
-                </div>
-                <div className="border border-black p-3">
-                  <div className="flex justify-between">
-                    <span className="font-medium">Sample Name 3</span>
-                    <span>35 votes</span>
+              <h2 className="text-2xl font-bold mb-4 text-black">Vote & Leaderboard</h2>
+              <p className="text-black mb-6">Vote for your favorite names and see the current rankings</p>
+              <div className="space-y-4">
+                <div className="border border-black p-4">
+                  <h3 className="font-bold text-black mb-2">Top Names</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center p-2 border border-black">
+                      <span className="text-black">1. Geomi</span>
+                      <span className="text-black">0 votes</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 border border-black">
+                      <span className="text-black">2. Mascot</span>
+                      <span className="text-black">0 votes</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 border border-black">
+                      <span className="text-black">3. Friend</span>
+                      <span className="text-black">0 votes</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -100,32 +114,29 @@ export default function App() {
 
           {activeTab === 'store' && (
             <div>
-              <h2 className="text-2xl font-bold mb-4 text-black">Vote Store</h2>
+              <h2 className="text-2xl font-bold mb-4 text-black">Buy Votes</h2>
               <p className="text-black mb-6">Purchase vote packs to support your favorite names</p>
               <div className="space-y-4">
                 <div className="border border-black p-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="font-bold">5 Vote Pack</h3>
-                      <p className="text-sm">5 additional votes</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold">1.0 APT</p>
-                      <button className="bg-black text-white px-3 py-1 text-sm">Buy</button>
-                    </div>
-                  </div>
+                  <h3 className="font-bold text-black mb-2">Vote Pack - Small</h3>
+                  <p className="text-black mb-2">10 votes for 0.1 APT</p>
+                  <button className="px-4 py-2 bg-black text-white hover:bg-gray-800">
+                    Buy Small Pack
+                  </button>
                 </div>
                 <div className="border border-black p-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="font-bold">10 Vote Pack</h3>
-                      <p className="text-sm">10 additional votes</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold">1.8 APT</p>
-                      <button className="bg-black text-white px-3 py-1 text-sm">Buy</button>
-                    </div>
-                  </div>
+                  <h3 className="font-bold text-black mb-2">Vote Pack - Medium</h3>
+                  <p className="text-black mb-2">50 votes for 0.4 APT</p>
+                  <button className="px-4 py-2 bg-black text-white hover:bg-gray-800">
+                    Buy Medium Pack
+                  </button>
+                </div>
+                <div className="border border-black p-4">
+                  <h3 className="font-bold text-black mb-2">Vote Pack - Large</h3>
+                  <p className="text-black mb-2">100 votes for 0.7 APT</p>
+                  <button className="px-4 py-2 bg-black text-white hover:bg-gray-800">
+                    Buy Large Pack
+                  </button>
                 </div>
               </div>
             </div>
@@ -134,33 +145,26 @@ export default function App() {
           {activeTab === 'instructions' && (
             <div>
               <h2 className="text-2xl font-bold mb-4 text-black">How to Vote</h2>
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-bold mb-2">Getting Started</h3>
-                  <ol className="list-decimal list-inside text-black space-y-1">
-                    <li>Connect your Aptos wallet</li>
-                    <li>Register to get your free vote</li>
-                    <li>Suggest creative names (up to 10 suggestions)</li>
-                    <li>Vote for your favorite names</li>
-                  </ol>
+              <div className="space-y-4 text-black">
+                <div className="border border-black p-4">
+                  <h3 className="font-bold mb-2">1. Connect Your Wallet</h3>
+                  <p>Connect your Aptos wallet to participate in voting</p>
                 </div>
-                <div>
-                  <h3 className="text-lg font-bold mb-2">Voting Rules</h3>
-                  <ul className="list-disc list-inside text-black space-y-1">
-                    <li>Each user gets 1 free vote per name</li>
-                    <li>Purchase boost votes for additional voting power</li>
-                    <li>You can vote for multiple names</li>
-                    <li>Votes cannot be changed once cast</li>
-                  </ul>
+                <div className="border border-black p-4">
+                  <h3 className="font-bold mb-2">2. Suggest Names</h3>
+                  <p>Submit up to 10 creative names for our mascot</p>
+                </div>
+                <div className="border border-black p-4">
+                  <h3 className="font-bold mb-2">3. Buy Votes</h3>
+                  <p>Purchase vote packs to support your favorite names</p>
+                </div>
+                <div className="border border-black p-4">
+                  <h3 className="font-bold mb-2">4. Vote</h3>
+                  <p>Use your votes to support the names you like best</p>
                 </div>
               </div>
             </div>
           )}
-        </div>
-
-        {/* Footer */}
-        <div className="text-center mt-8 pt-6 border-t border-black">
-          <p className="text-sm text-black">Built for the Geomi community</p>
         </div>
       </div>
     </div>
