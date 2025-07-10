@@ -469,26 +469,26 @@ export default function Home() {
         {/* Header */}
         <div className="flex items-start justify-between py-6">
           <div className="flex items-center gap-4">
-            <div className="glass-card p-3">
-              <h1 className="text-xl font-bold">🎭 Geomi Mascot Contest</h1>
-              <p className="text-sm text-gray-600">Vote for your favorite name!</p>
+            <div className="glass-card">
+              <h1 className="text-xl font-bold text-neutral-950">🎭 Geomi Mascot Contest</h1>
+              <p className="text-sm text-neutral-950/60">Vote for your favorite name!</p>
             </div>
           </div>
           
           <div className="flex-1 text-center">
-            <h1 className="text-4xl font-bold mb-4">Name Geomi's Mascot!</h1>
-            <p className="text-lg mb-6">Join our community in choosing the perfect name for our beloved mascot!</p>
+            <h1 className="text-4xl font-bold mb-4 text-neutral-950">Name Geomi's Mascot!</h1>
+            <p className="text-lg mb-6 text-neutral-950/80">Join our community in choosing the perfect name for our beloved mascot!</p>
           </div>
           
           <div className="flex flex-col gap-3">
             {/* Boost Votes Indicator */}
             {connected && userAccount && (
-              <div className="glass-card p-3">
+              <div className="glass-card">
                 <div className="flex items-center gap-2">
-                  <Coins size={20} />
+                  <Coins size={20} className="text-blaze-600" />
                   <div>
-                    <div className="text-lg font-bold">{userAccount.boostVotesOwned}</div>
-                    <div className="text-xs text-gray-600">Boost Votes</div>
+                    <div className="text-lg font-bold text-blaze-600">{userAccount.boostVotesOwned}</div>
+                    <div className="text-xs text-neutral-950/60 font-mono">Boost Votes</div>
                   </div>
                 </div>
               </div>
@@ -501,7 +501,7 @@ export default function Home() {
         
         {/* Tab Navigation */}
         <div className="flex justify-center mb-8">
-          <div className="flex gap-1 border-2 border-black rounded-lg p-1 flex-wrap">
+          <div className="flex gap-2 bg-brand-light/50 border-2 border-neutral-950 rounded-lg p-2 flex-wrap backdrop-blur-sm">
             <button
               onClick={() => setActiveTab('main')}
               className={activeTab === 'main' ? 'tab-active' : 'tab-inactive'}
@@ -562,16 +562,16 @@ export default function Home() {
 
             {/* Status Message */}
             {status && (
-              <div className="glass-card max-w-2xl mx-auto mb-6 p-4">
-                <p className="text-center">{status}</p>
+              <div className="glass-card max-w-2xl mx-auto mb-6">
+                <p className="text-center text-neutral-950">{status}</p>
               </div>
             )}
 
             {/* Prize Pool */}
             <div className="prize-pool max-w-4xl mx-auto mb-8">
-              <h2 className="text-2xl font-bold mb-2">Prize Pool</h2>
-              <p className="text-4xl font-bold mb-2">{prizePool.total.toFixed(2)} APT</p>
-              <div className="flex items-center justify-center gap-4 text-sm">
+              <h2 className="text-2xl font-bold mb-2 text-neutral-950">Prize Pool</h2>
+              <p className="text-4xl font-bold mb-2 text-blaze-600">{prizePool.total.toFixed(2)} APT</p>
+              <div className="flex items-center justify-center gap-4 text-sm text-neutral-950/80">
                 <span>{prizePool.contributors} contributors</span>
                 <span>Winner takes all!</span>
               </div>
@@ -620,8 +620,8 @@ export default function Home() {
 
       {/* Footer */}
       <div className="text-center mt-16 pb-8">
-        <div className="glass-card max-w-3xl mx-auto p-4">
-          <div className="flex flex-wrap justify-center gap-6 text-sm mb-4">
+        <div className="glass-card max-w-3xl mx-auto">
+          <div className="flex flex-wrap justify-center gap-6 text-sm mb-4 text-neutral-950/80">
             <span>{suggestions.length} names suggested</span>
             <span>{suggestions.reduce((sum, s) => sum + s.totalVotes, 0)} total votes</span>
             <span>{prizePool.total.toFixed(2)} APT prize pool</span>

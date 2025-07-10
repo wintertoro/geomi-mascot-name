@@ -2,117 +2,179 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import brand fonts */
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 body {
-  color: black;
-  background: white;
-  font-family: system-ui, -apple-system, sans-serif;
+  color: #0e0707; /* neutral-950 */
+  background: #f4f2ee; /* neutral-100 */
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
 }
 
-/* Minimal styles only */
+/* Brand gradient background */
 .bw-gradient {
-  background: white;
-  color: black;
+  background: linear-gradient(135deg, #f4f2ee 0%, #f8f8f8 100%);
+  color: #0e0707;
 }
 
 .glass-card {
-  background: white;
-  border: 2px solid black;
-  border-radius: 8px;
-  padding: 16px;
+  background: rgba(248, 248, 248, 0.9);
+  border: 2px solid #0e0707;
+  border-radius: 12px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(14, 7, 7, 0.1);
 }
 
 .glass-button {
-  background: white;
-  border: 2px solid black;
-  border-radius: 6px;
-  padding: 8px 16px;
+  background: #f8f8f8;
+  border: 2px solid #0e0707;
+  border-radius: 8px;
+  padding: 12px 20px;
   font-weight: 500;
   cursor: pointer;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  transition: all 0.2s ease;
 }
 
 .glass-button:hover {
-  background: #f5f5f5;
+  background: #f4f2ee;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(14, 7, 7, 0.15);
 }
 
 .glass-button.primary {
-  background: black;
+  background: #ff5400; /* blaze-600 */
   color: white;
+  border-color: #ff5400;
 }
 
 .glass-button.primary:hover {
-  background: #333;
+  background: #e64800;
+  border-color: #e64800;
+}
+
+.glass-button.secondary {
+  background: #1fa1ff; /* sky-blue-600 */
+  color: white;
+  border-color: #1fa1ff;
+}
+
+.glass-button.secondary:hover {
+  background: #0d8ae6;
+  border-color: #0d8ae6;
+}
+
+.glass-button.success {
+  background: #609057; /* olive-500 */
+  color: white;
+  border-color: #609057;
+}
+
+.glass-button.success:hover {
+  background: #4f7a47;
+  border-color: #4f7a47;
 }
 
 .glass-input {
   width: 100%;
-  padding: 12px 16px;
-  border: 2px solid black;
-  border-radius: 6px;
-  background: white;
+  padding: 16px 20px;
+  border: 2px solid #0e0707;
+  border-radius: 8px;
+  background: #f8f8f8;
   font-size: 16px;
+  font-family: 'Inter', system-ui, sans-serif;
+  transition: all 0.2s ease;
 }
 
 .glass-input:focus {
   outline: none;
-  border-color: #333;
+  border-color: #ff5400;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(255, 84, 0, 0.1);
 }
 
 .suggestion-card {
-  background: white;
-  border: 2px solid black;
-  border-radius: 8px;
-  padding: 16px;
+  background: rgba(248, 248, 248, 0.95);
+  border: 2px solid #0e0707;
+  border-radius: 12px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  transition: all 0.2s ease;
+}
+
+.suggestion-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(14, 7, 7, 0.15);
 }
 
 .status-badge {
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 24px;
+  font-size: 12px;
   font-weight: 500;
-  border: 2px solid black;
+  border: 2px solid #0e0707;
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .status-badge.active {
-  background: black;
+  background: #609057;
   color: white;
+  border-color: #609057;
 }
 
 .status-badge.inactive {
-  background: white;
-  color: black;
+  background: #f8f8f8;
+  color: #0e0707;
 }
 
 .prize-pool {
   text-align: center;
-  padding: 20px;
-  border: 2px solid black;
-  border-radius: 8px;
-  background: white;
+  padding: 24px;
+  border: 2px solid #ff5400;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f8f8f8 0%, rgba(255, 84, 0, 0.05) 100%);
+  box-shadow: 0 4px 16px rgba(255, 84, 0, 0.1);
 }
 
 .tab-active {
-  background: black;
+  background: #ff5400;
   color: white;
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 12px 20px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   gap: 8px;
   font-weight: 500;
+  font-family: 'Inter', system-ui, sans-serif;
+  border: 2px solid #ff5400;
+  transition: all 0.2s ease;
 }
 
 .tab-inactive {
-  background: white;
-  color: black;
-  padding: 8px 16px;
-  border-radius: 6px;
+  background: #f8f8f8;
+  color: #0e0707;
+  padding: 12px 20px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   gap: 8px;
   font-weight: 500;
   cursor: pointer;
+  font-family: 'Inter', system-ui, sans-serif;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
 }
 
 .tab-inactive:hover {
-  background: #f5f5f5;
+  background: #f4f2ee;
+  border-color: #0e0707;
+  transform: translateY(-1px);
 }

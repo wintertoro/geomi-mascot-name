@@ -33,10 +33,10 @@ export const MainTab = ({
   <div className="max-w-4xl mx-auto space-y-8">
     {/* Registration prompt */}
     {connected && !isRegistered && (
-      <div className="glass-card p-6">
+      <div className="glass-card">
         <div className="text-center">
-          <h3 className="text-xl font-bold mb-4">Get Started!</h3>
-          <p className="mb-4">Register to get your free vote and start suggesting names!</p>
+          <h3 className="text-xl font-bold mb-4 text-neutral-950">Get Started!</h3>
+          <p className="mb-4 text-neutral-950/80">Register to get your free vote and start suggesting names!</p>
           <button
             onClick={handleRegister}
             disabled={isRegistering}
@@ -50,29 +50,29 @@ export const MainTab = ({
 
     {/* User Stats */}
     {connected && isRegistered && userAccount && (
-      <div className="glass-card p-6">
-        <h3 className="text-lg font-bold mb-4">Your Account Status</h3>
+      <div className="glass-card">
+        <h3 className="text-lg font-bold mb-4 text-neutral-950">Your Account Status</h3>
         <div className="grid md:grid-cols-3 gap-4 text-center">
-          <div>
-            <div className="text-2xl font-bold">{userAccount.freeVotesRemaining}</div>
-            <div className="text-sm text-gray-600">Free Votes Left</div>
+          <div className="bg-sky-blue-500/10 rounded-lg p-4 border border-sky-blue-500/20">
+            <div className="text-2xl font-bold text-sky-blue-600">{userAccount.freeVotesRemaining}</div>
+            <div className="text-sm text-neutral-950/60 font-mono">Free Votes Left</div>
           </div>
-          <div>
-            <div className="text-2xl font-bold">{userAccount.boostVotesOwned}</div>
-            <div className="text-sm text-gray-600">Boost Votes Owned</div>
+          <div className="bg-blaze-600/10 rounded-lg p-4 border border-blaze-600/20">
+            <div className="text-2xl font-bold text-blaze-600">{userAccount.boostVotesOwned}</div>
+            <div className="text-sm text-neutral-950/60 font-mono">Boost Votes Owned</div>
           </div>
-          <div>
-            <div className="text-2xl font-bold">{userAccount.suggestionsCount}/3</div>
-            <div className="text-sm text-gray-600">Name Suggestions</div>
+          <div className="bg-olive-500/10 rounded-lg p-4 border border-olive-500/20">
+            <div className="text-2xl font-bold text-olive-500">{userAccount.suggestionsCount}/3</div>
+            <div className="text-sm text-neutral-950/60 font-mono">Name Suggestions</div>
           </div>
         </div>
       </div>
     )}
 
     {/* Name Suggestion Form */}
-    <div className="glass-card p-6">
-      <h2 className="text-2xl font-bold mb-4">Suggest a Name for Geomi!</h2>
-      <p className="mb-6">Help us choose the perfect name for our beloved mascot. You can suggest up to 3 names for free!</p>
+    <div className="glass-card">
+      <h2 className="text-2xl font-bold mb-4 text-neutral-950">Suggest a Name for Geomi!</h2>
+      <p className="mb-6 text-neutral-950/80">Help us choose the perfect name for our beloved mascot. You can suggest up to 3 names for free!</p>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
@@ -101,12 +101,12 @@ export const MainTab = ({
     </div>
 
     {/* Recent Suggestions Preview */}
-    <div className="glass-card p-6">
+    <div className="glass-card">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-bold">Recent Suggestions</h3>
+        <h3 className="text-xl font-bold text-neutral-950">Recent Suggestions</h3>
         <button
           onClick={() => setActiveTab('leaderboard')}
-          className="glass-button"
+          className="glass-button secondary"
         >
           View All & Vote
         </button>
@@ -118,21 +118,21 @@ export const MainTab = ({
             <div key={suggestion.id} className="suggestion-card">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-lg">{suggestion.name}</span>
+                  <span className="font-bold text-lg text-neutral-950">{suggestion.name}</span>
                   <button
                     onClick={() => handleShare(suggestion)}
-                    className="p-1 hover:bg-gray-200 rounded transition-colors"
+                    className="p-1 hover:bg-neutral-100 rounded transition-colors"
                     title={`Share "${suggestion.name}"`}
                   >
-                    <Share2 size={14} />
+                    <Share2 size={14} className="text-neutral-950/60" />
                   </button>
                 </div>
-                <span className="font-bold">{suggestion.totalVotes} votes</span>
+                <span className="font-bold text-blaze-600">{suggestion.totalVotes} votes</span>
               </div>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-neutral-950/60 font-mono">
                 Free: {suggestion.freeVotes} | Boost: {suggestion.boostVotes}
               </div>
-              <div className="text-xs text-gray-500 mt-2">
+              <div className="text-xs text-neutral-950/40 mt-2 font-mono">
                 by {suggestion.submittedBy.slice(0, 6)}...{suggestion.submittedBy.slice(-4)}
               </div>
             </div>
@@ -140,8 +140,8 @@ export const MainTab = ({
         </div>
       ) : (
         <div className="text-center py-8">
-          <h3 className="text-lg font-bold mb-2">No suggestions yet</h3>
-          <p className="text-gray-600">Be the first to suggest an amazing name!</p>
+          <h3 className="text-lg font-bold mb-2 text-neutral-950">No suggestions yet</h3>
+          <p className="text-neutral-950/60">Be the first to suggest an amazing name!</p>
         </div>
       )}
     </div>
