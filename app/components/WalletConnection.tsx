@@ -1,11 +1,10 @@
 'use client';
 
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import { WalletSelector } from "@aptos-labs/wallet-adapter-ant-design";
 import { Wallet } from "./Icons";
 
 export const WalletConnection = () => {
-  const { account, connected, wallet, disconnect } = useWallet();
+  const { account, connected, wallet, disconnect, wallets, connect } = useWallet();
 
   const handleDisconnect = () => {
     disconnect();
@@ -35,7 +34,28 @@ export const WalletConnection = () => {
             <Wallet size={16} />
             <span>Not Connected</span>
           </div>
-          <WalletSelector />
+          <div className="relative">
+            <select
+              onChange={(e) => {
+                const walletName = e.target.value;
+                if (walletName) {
+                  const selectedWallet = wallets.find(w => w.name === walletName);
+                  if (selectedWallet) {
+                    connect(selectedWallet.name);
+                  }
+                }
+              }}
+              className="glass-button text-sm"
+              defaultValue=""
+            >
+              <option value="" disabled>Connect Wallet</option>
+              {wallets.map((wallet) => (
+                <option key={wallet.name} value={wallet.name}>
+                  {wallet.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       )}
     </div>

@@ -62,7 +62,7 @@ export const MainTab = ({
             <div className="text-sm text-neutral-950/60 font-mono">Boost Votes Owned</div>
           </div>
           <div className="bg-olive-500/10 rounded-lg p-4 border border-olive-500/20">
-            <div className="text-2xl font-bold text-olive-500">{userAccount.suggestionsCount}/3</div>
+            <div className="text-2xl font-bold text-olive-500">{userAccount.suggestionsCount}/10</div>
             <div className="text-sm text-neutral-950/60 font-mono">Name Suggestions</div>
           </div>
         </div>
@@ -72,7 +72,7 @@ export const MainTab = ({
     {/* Name Suggestion Form */}
     <div className="glass-card">
       <h2 className="text-2xl font-bold mb-4 text-neutral-950">Suggest a Name for Geomi!</h2>
-      <p className="mb-6 text-neutral-950/80">Help us choose the perfect name for our beloved mascot. You can suggest up to 3 names for free!</p>
+      <p className="mb-6 text-neutral-950/80">Help us choose the perfect name for our beloved mascot. You can suggest up to 10 names for free!</p>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
@@ -87,14 +87,14 @@ export const MainTab = ({
         
         <button
           type="submit"
-          disabled={!connected || !isRegistered || isSubmitting || !newName.trim() || (userAccount?.suggestionsCount ?? 0) >= 3}
+          disabled={!connected || !isRegistered || isSubmitting || !newName.trim() || (userAccount?.suggestionsCount ?? 0) >= 10}
           className="w-full glass-button primary disabled:opacity-50"
         >
           {!connected ? 'Connect Wallet to Suggest' :
            !isRegistered ? 'Register First' :
            isSubmitting ? 'Submitting...' :
-           (userAccount?.suggestionsCount ?? 0) >= 3 ? 'Max 3 Suggestions Reached' :
-           `Submit Name (${(userAccount?.suggestionsCount ?? 0)}/3 suggestions used)`}
+           (userAccount?.suggestionsCount ?? 0) >= 10 ? 'Max 10 Suggestions Reached' :
+           `Submit Name (${(userAccount?.suggestionsCount ?? 0)}/10 suggestions used)`}
         </button>
       </form>
 
