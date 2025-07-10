@@ -242,4 +242,18 @@ For questions, issues, or suggestions:
 ---
 
 **Built with ❤️ for the Geomi community** 🎭
+# Geomi Mascot Name Voting App
+
+A simple black and white voting interface for choosing the perfect name for Geomi's mascot.
+
+## Features
+- Clean, minimal black and white design
+- Name suggestion system (up to 10 suggestions per user)
+- Voting and leaderboard functionality
+- Vote purchasing system
+- User suggestion tracking
+
+## Deployment
+This app is configured for Vercel deployment with legacy peer dependencies support.
+
 # Vercel Deployment Test
