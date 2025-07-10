@@ -13,10 +13,12 @@ const nextConfig = {
     optimizePackageImports: ['@aptos-labs/wallet-adapter-react'],
     // Optimize server components
     serverComponentsExternalPackages: ['@aptos-labs/ts-sdk'],
-    // Enable partial prerendering for faster builds
+    // Disable partial prerendering to prevent SSR issues
     ppr: false,
     // Optimize CSS - disabled due to critters issue
     optimizeCss: false,
+    // Force dynamic rendering
+    forceSwcTransforms: false,
   },
   // Disable image optimization for faster builds
   images: {
@@ -78,11 +80,13 @@ const nextConfig = {
     
     return config;
   },
-  // Enable output file tracing for smaller bundles
-  output: 'standalone',
-  // Optimize static generation
+  // Disable static optimization to prevent SSR issues with wallet components
   trailingSlash: false,
   generateEtags: false,
+  // Disable static optimization
+  generateBuildId: async () => {
+    return 'build-' + Date.now()
+  },
   // Compress static assets
   compress: true,
   // Optimize dev builds
