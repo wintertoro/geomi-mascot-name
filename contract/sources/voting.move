@@ -30,7 +30,7 @@ module geomi_mascot_voting::geomi_voting {
     const CHAMPION_PACK_VOTES: u64 = 60;
 
     /// Maximum suggestions per user
-    const MAX_SUGGESTIONS_PER_USER: u64 = 3;
+    const MAX_SUGGESTIONS_PER_USER: u64 = 10;
 
     /// Name suggestion structure
     struct NameSuggestion has copy, drop, store {
@@ -45,7 +45,7 @@ module geomi_mascot_voting::geomi_voting {
 
     /// User account structure
     struct UserAccount has copy, drop, store {
-        free_votes_remaining: u64,
+        free_votes_remaining: u64, // Kept for compatibility - not used in new logic
         boost_votes_owned: u64,
         total_spent: u64,
         free_voted_names: vector<u64>, // Names user has used free vote on
@@ -92,7 +92,7 @@ module geomi_mascot_voting::geomi_voting {
     }
 
     /// Initialize the voting system
-    public fun initialize(admin: &signer, voting_duration_seconds: u64) {
+    public entry fun initialize(admin: &signer, voting_duration_seconds: u64) {
         let admin_addr = signer::address_of(admin);
         
         let voting_system = VotingSystem {
@@ -111,7 +111,7 @@ module geomi_mascot_voting::geomi_voting {
     }
 
     /// Register a new user
-    public fun register_user(user: &signer) acquires VotingSystem {
+    public entry fun register_user(user: &signer) acquires VotingSystem {
         let user_addr = signer::address_of(user);
         let voting_system = borrow_global_mut<VotingSystem>(@geomi_mascot_voting);
         
@@ -119,7 +119,7 @@ module geomi_mascot_voting::geomi_voting {
         let user_exists = vector::contains(&voting_system.user_addresses, &user_addr);
         if (!user_exists) {
             let user_account = UserAccount {
-                free_votes_remaining: 3, // Each user gets 3 free votes
+                free_votes_remaining: 999, // High number for compatibility - not used in new logic
                 boost_votes_owned: 0,
                 total_spent: 0,
                 free_voted_names: vector::empty<u64>(),
@@ -132,7 +132,7 @@ module geomi_mascot_voting::geomi_voting {
     }
 
     /// Submit a name suggestion
-    public fun suggest_name(user: &signer, name: String) acquires VotingSystem {
+    public entry fun suggest_name(user: &signer, name: String) acquires VotingSystem {
         let user_addr = signer::address_of(user);
         let voting_system = borrow_global_mut<VotingSystem>(@geomi_mascot_voting);
         
@@ -182,7 +182,7 @@ module geomi_mascot_voting::geomi_voting {
     }
 
     /// Cast a vote (free or boost)
-    public fun cast_vote(user: &signer, suggestion_id: u64, is_boost_vote: bool) acquires VotingSystem {
+    public entry fun cast_vote(user: &signer, suggestion_id: u64, is_boost_vote: bool) acquires VotingSystem {
         let user_addr = signer::address_of(user);
         let voting_system = borrow_global_mut<VotingSystem>(@geomi_mascot_voting);
         
@@ -198,10 +198,8 @@ module geomi_mascot_voting::geomi_voting {
             assert!(user_account.boost_votes_owned > 0, E_INSUFFICIENT_PAYMENT);
             user_account.boost_votes_owned = user_account.boost_votes_owned - 1;
         } else {
-            // For free votes, check if user has free votes and hasn't used free vote on this name
-            assert!(user_account.free_votes_remaining > 0, E_INSUFFICIENT_PAYMENT);
+            // For free votes, check if user hasn't used free vote on this name yet
             assert!(!vector::contains(&user_account.free_voted_names, &suggestion_id), E_ALREADY_VOTED_FREE);
-            user_account.free_votes_remaining = user_account.free_votes_remaining - 1;
             vector::push_back(&mut user_account.free_voted_names, suggestion_id);
         };
         
@@ -226,7 +224,7 @@ module geomi_mascot_voting::geomi_voting {
     }
 
     /// Purchase vote pack
-    public fun purchase_vote_pack(user: &signer, pack_type: String, payment_amount: u64) acquires VotingSystem {
+    public entry fun purchase_vote_pack(user: &signer, pack_type: String, payment_amount: u64) acquires VotingSystem {
         let user_addr = signer::address_of(user);
         let voting_system = borrow_global_mut<VotingSystem>(@geomi_mascot_voting);
         

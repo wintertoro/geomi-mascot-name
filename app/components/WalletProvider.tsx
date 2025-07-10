@@ -11,21 +11,14 @@ export const WalletProvider = ({ children }: PropsWithChildren) => {
     setIsClient(true);
   }, []);
 
-  // Show loading state while hydrating
+  // Render children without wallet provider during SSR
   if (!isClient) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
-        <div className="glass-card p-8 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading wallet adapter...</p>
-        </div>
-      </div>
-    );
+    return <>{children}</>;
   }
 
   return (
     <AptosWalletAdapterProvider
-      autoConnect={false}
+      autoConnect={true}
       dappConfig={{ 
         network: Network.TESTNET,
         mizuwallet: {

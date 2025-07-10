@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Fredoka } from "next/font/google";
 import "./globals.css";
-// import "@aptos-labs/wallet-adapter-ant-design/dist/index.css";
-// import { WalletProvider } from "./components/WalletProvider";
+import "@aptos-labs/wallet-adapter-ant-design/dist/index.css";
+import { WalletProvider } from "./components/WalletProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -27,7 +27,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${fredoka.variable} font-inter antialiased`}>
-        {children}
+        <WalletProvider>
+          {children}
+        </WalletProvider>
       </body>
     </html>
   );
