@@ -1,4 +1,4 @@
-import { Trophy } from './Icons';
+import { Trophy, Share2 } from './Icons';
 import { NameSuggestion, UserAccount } from '../services/blockchain';
 
 interface LeaderboardTabProps {
@@ -7,6 +7,7 @@ interface LeaderboardTabProps {
   isRegistered: boolean;
   userAccount: UserAccount | null;
   handleVote: (suggestionId: string, isPaidVote: boolean) => void;
+  handleShare: (suggestion: NameSuggestion) => void;
 }
 
 export const LeaderboardTab = ({
@@ -15,6 +16,7 @@ export const LeaderboardTab = ({
   isRegistered,
   userAccount,
   handleVote,
+  handleShare,
 }: LeaderboardTabProps) => {
   const sortedSuggestions = [...suggestions].sort((a, b) => b.totalVotes - a.totalVotes);
 
@@ -27,7 +29,7 @@ export const LeaderboardTab = ({
         <h3 className="font-bold mb-2">Voting Rules:</h3>
         <ul className="text-sm space-y-1">
           <li>• One FREE vote per name maximum</li>
-          <li>• Multiple PAID votes allowed per name</li>
+          <li>• Multiple BOOST votes allowed per name</li>
           <li>• Votes cannot be removed once cast</li>
         </ul>
       </div>
@@ -45,12 +47,19 @@ export const LeaderboardTab = ({
                     <div className="flex items-center gap-2">
                       {index === 0 && <Trophy size={16} />}
                       <span className="font-bold text-lg">{suggestion.name}</span>
+                      <button
+                        onClick={() => handleShare(suggestion)}
+                        className="p-1 hover:bg-gray-200 rounded transition-colors"
+                        title={`Share "${suggestion.name}"`}
+                      >
+                        <Share2 size={14} />
+                      </button>
                     </div>
                     <div className="text-sm text-gray-600">
                       by {suggestion.submittedBy.slice(0, 6)}...{suggestion.submittedBy.slice(-4)}
                     </div>
                     <div className="text-xs text-gray-500">
-                      Free: {suggestion.freeVotes} | Paid: {suggestion.paidVotes}
+                      Free: {suggestion.freeVotes} | Boost: {suggestion.boostVotes}
                     </div>
                   </div>
                   <div className="text-center space-y-2">
@@ -66,10 +75,10 @@ export const LeaderboardTab = ({
                       
                       <button
                         onClick={() => handleVote(suggestion.id, true)}
-                        disabled={!connected || !isRegistered || !userAccount?.paidVotesOwned}
+                        disabled={!connected || !isRegistered || !userAccount?.boostVotesOwned}
                         className="glass-button primary disabled:opacity-50"
                       >
-                        Paid
+                        Boost
                       </button>
                     </div>
                   </div>

@@ -13,7 +13,7 @@ export interface NameSuggestion {
   id: string;
   name: string;
   freeVotes: number;
-  paidVotes: number;
+  boostVotes: number;
   totalVotes: number;
   submittedBy: string;
   timestamp: number;
@@ -21,9 +21,10 @@ export interface NameSuggestion {
 
 export interface UserAccount {
   freeVotesRemaining: number;
-  paidVotesOwned: number;
+  boostVotesOwned: number;
   totalSpent: number;
   freeVotedNames: string[]; // Names user has used free vote on
+  suggestionsCount: number; // Number of names user has suggested
 }
 
 export interface PrizePool {
@@ -76,7 +77,7 @@ class BlockchainService {
     const transaction = await this.aptos.transaction.build.simple({
       sender: adminAddress,
       data: {
-        function: `${this.contractAddress}::voting::initialize`,
+        function: `${this.contractAddress}::geomi_voting::initialize`,
         functionArguments: [new U64(votingDurationSeconds)],
       },
     });
@@ -97,7 +98,7 @@ class BlockchainService {
     const transaction = await this.aptos.transaction.build.simple({
       sender: userAddress,
       data: {
-        function: `${this.contractAddress}::voting::register_user`,
+        function: `${this.contractAddress}::geomi_voting::register_user`,
         functionArguments: [],
       },
     });
@@ -119,7 +120,7 @@ class BlockchainService {
     const transaction = await this.aptos.transaction.build.simple({
       sender: userAddress,
       data: {
-        function: `${this.contractAddress}::voting::suggest_name`,
+        function: `${this.contractAddress}::geomi_voting::suggest_name`,
         functionArguments: [new MoveString(name)],
       },
     });
@@ -132,7 +133,7 @@ class BlockchainService {
   async castVote(
     userAddress: string,
     suggestionId: number,
-    isPaidVote: boolean,
+    isBoostVote: boolean,
     signAndSubmitTransaction: (transaction: any) => Promise<any>
   ): Promise<string> {
     if (!this.contractAddress) {
@@ -142,10 +143,10 @@ class BlockchainService {
     const transaction = await this.aptos.transaction.build.simple({
       sender: userAddress,
       data: {
-        function: `${this.contractAddress}::voting::cast_vote`,
+        function: `${this.contractAddress}::geomi_voting::cast_vote`,
         functionArguments: [
           new U64(suggestionId),
-          new Bool(isPaidVote)
+          new Bool(isBoostVote)
         ],
       },
     });
@@ -170,7 +171,7 @@ class BlockchainService {
     const transaction = await this.aptos.transaction.build.simple({
       sender: userAddress,
       data: {
-        function: `${this.contractAddress}::voting::purchase_vote_pack`,
+        function: `${this.contractAddress}::geomi_voting::purchase_vote_pack`,
         functionArguments: [
           new MoveString(packType),
           new U64(octasAmount)
@@ -192,7 +193,7 @@ class BlockchainService {
     try {
       const result = await this.aptos.view({
         payload: {
-          function: `${this.contractAddress}::voting::get_suggestions`,
+          function: `${this.contractAddress}::geomi_voting::get_suggestions`,
           functionArguments: [],
         },
       });
@@ -203,7 +204,7 @@ class BlockchainService {
         id: s.id.toString(),
         name: s.name,
         freeVotes: parseInt(s.free_votes),
-        paidVotes: parseInt(s.paid_votes),
+        boostVotes: parseInt(s.boost_votes),
         totalVotes: parseInt(s.total_votes),
         submittedBy: s.submitted_by,
         timestamp: parseInt(s.timestamp),
@@ -223,7 +224,7 @@ class BlockchainService {
     try {
       const result = await this.aptos.view({
         payload: {
-          function: `${this.contractAddress}::voting::get_user_account`,
+          function: `${this.contractAddress}::geomi_voting::get_user_account`,
           functionArguments: [userAddress],
         },
       });
@@ -231,9 +232,10 @@ class BlockchainService {
       const account = result[0] as any;
       return {
         freeVotesRemaining: parseInt(account.free_votes_remaining),
-        paidVotesOwned: parseInt(account.paid_votes_owned),
+        boostVotesOwned: parseInt(account.boost_votes_owned),
         totalSpent: parseInt(account.total_spent),
         freeVotedNames: account.free_voted_names.map((id: any) => id.toString()),
+        suggestionsCount: parseInt(account.suggestions_count),
       };
     } catch (error) {
       console.error('Error fetching user account:', error);
@@ -250,7 +252,7 @@ class BlockchainService {
     try {
       const result = await this.aptos.view({
         payload: {
-          function: `${this.contractAddress}::voting::get_prize_pool`,
+          function: `${this.contractAddress}::geomi_voting::get_prize_pool`,
           functionArguments: [],
         },
       });
@@ -275,7 +277,7 @@ class BlockchainService {
     try {
       const result = await this.aptos.view({
         payload: {
-          function: `${this.contractAddress}::voting::get_voting_end_time`,
+          function: `${this.contractAddress}::geomi_voting::get_voting_end_time`,
           functionArguments: [],
         },
       });
@@ -339,8 +341,8 @@ export const registerUser = (userAddress: string, signAndSubmitTransaction: any)
 export const suggestName = (userAddress: string, name: string, signAndSubmitTransaction: any) => 
   blockchainService.suggestName(userAddress, name, signAndSubmitTransaction);
 
-export const castVote = (userAddress: string, suggestionId: number, isPaidVote: boolean, signAndSubmitTransaction: any) => 
-  blockchainService.castVote(userAddress, suggestionId, isPaidVote, signAndSubmitTransaction);
+export const castVote = (userAddress: string, suggestionId: number, isBoostVote: boolean, signAndSubmitTransaction: any) => 
+  blockchainService.castVote(userAddress, suggestionId, isBoostVote, signAndSubmitTransaction);
 
 export const purchaseVotePack = (userAddress: string, packType: string, aptAmount: number, signAndSubmitTransaction: any) => 
   blockchainService.purchaseVotePack(userAddress, packType, aptAmount, signAndSubmitTransaction);

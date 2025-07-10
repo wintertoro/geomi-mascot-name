@@ -7,7 +7,7 @@ A decentralized voting application built on the Aptos blockchain for naming our 
 ### 🗳️ **Voting System**
 - **Multiple Name Voting**: Vote for as many different names as you like
 - **Dual Vote Types**: 
-  - **Free Votes**: One per name (included with registration)
+  - **Free Votes**: One per name (3 free votes included with registration)
   - **Paid Votes**: Unlimited per name for maximum impact
 - **Strategic Voting**: Stack multiple paid votes on your favorites
 - **Permanent Votes**: All votes are irreversible once cast
@@ -22,6 +22,8 @@ A decentralized voting application built on the Aptos blockchain for naming our 
 - **Wallet Integration**: Support for Petra, Martian, and other Aptos wallets
 - **Tabbed Interface**: Separate voting and instructions tabs
 - **Real-time Updates**: Live vote counts and prize pool tracking
+- **Social Sharing**: Share specific names with friends to get more votes
+- **Personal Dashboard**: Track your suggested names and their performance
 - **Responsive Design**: Works on desktop and mobile devices
 
 ## 🚀 Tech Stack
@@ -108,15 +110,16 @@ Add the deployed contract address to your `.env.local` file.
 
 ### For First-Time Users
 1. **Connect Wallet**: Use your Aptos wallet (Petra recommended)
-2. **Register**: Get your free vote by registering your account
-3. **Suggest Names**: Submit creative names for the Geomi mascot
+2. **Register**: Get your 3 free votes and ability to suggest names
+3. **Suggest Names**: Submit up to 3 creative names for the Geomi mascot (free)
 4. **Vote Strategically**: Use free votes across multiple names
 
 ### For Active Participants
-1. **Buy Vote Packs**: Purchase additional votes with APT tokens
-2. **Stack Votes**: Use multiple paid votes on your favorite names
-3. **Monitor Leaderboard**: Track which names are winning
-4. **Claim Rewards**: Winner takes the entire APT prize pool
+1. **Buy Boost Packs**: Purchase additional boost votes with APT tokens
+2. **Stack Votes**: Use multiple boost votes on your favorite names
+3. **Share Names**: Use the share button to get friends to vote for your favorites
+4. **Monitor Progress**: Check "My Suggestions" tab to track your names' performance
+5. **Claim Rewards**: Winner takes the entire APT prize pool
 
 ## 💎 Vote Pack Options
 
@@ -174,19 +177,26 @@ npm run build
 npm start
 ```
 
-## 🎯 Voting Rules
+## 🎯 Game Rules
 
-### ✅ **Allowed Actions**
+### ✅ **Name Suggestions**
+- Submit up to 3 creative names for free
+- Names must be unique (no duplicates)
+- Suggestions are separate from voting
+- No cost to suggest names
+
+### ✅ **Voting Rules**
 - Vote for multiple different names
 - Use one free vote per name
 - Purchase and use unlimited paid votes per name
-- Suggest new names (costs 1 free vote)
+- Each user gets 3 free votes when registering
 
 ### ❌ **Restrictions**
 - Cannot remove votes once cast
 - Cannot vote for the same name with multiple free votes
 - Must have sufficient balance for vote pack purchases
 - Cannot suggest duplicate names
+- Maximum 3 name suggestions per user
 
 ## 🏆 Prize Pool Mechanics
 

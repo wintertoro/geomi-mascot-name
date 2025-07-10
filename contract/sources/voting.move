@@ -1,11 +1,11 @@
-module geomi_mascot_voting::voting {
+module geomi_mascot_voting::geomi_voting {
     use std::signer;
     use std::string::{Self, String};
     use std::vector;
     use aptos_framework::coin::{Self, Coin};
     use aptos_framework::aptos_coin::AptosCoin;
     use aptos_framework::timestamp;
-    use aptos_framework::account;
+
     use aptos_framework::event;
 
     /// Error codes
@@ -15,6 +15,7 @@ module geomi_mascot_voting::voting {
     const E_INSUFFICIENT_PAYMENT: u64 = 4;
     const E_NAME_NOT_FOUND: u64 = 5;
     const E_DUPLICATE_NAME: u64 = 6;
+    const E_MAX_SUGGESTIONS_REACHED: u64 = 7;
 
     /// Vote pack prices in APT (in octas - 1 APT = 100,000,000 octas)
     const STARTER_PACK_PRICE: u64 = 500000000; // 5 APT
@@ -28,12 +29,15 @@ module geomi_mascot_voting::voting {
     const POWER_PACK_VOTES: u64 = 25;
     const CHAMPION_PACK_VOTES: u64 = 60;
 
+    /// Maximum suggestions per user
+    const MAX_SUGGESTIONS_PER_USER: u64 = 3;
+
     /// Name suggestion structure
     struct NameSuggestion has copy, drop, store {
         id: u64,
         name: String,
         free_votes: u64,
-        paid_votes: u64,
+        boost_votes: u64,
         total_votes: u64,
         submitted_by: address,
         timestamp: u64,
@@ -42,9 +46,10 @@ module geomi_mascot_voting::voting {
     /// User account structure
     struct UserAccount has copy, drop, store {
         free_votes_remaining: u64,
-        paid_votes_owned: u64,
+        boost_votes_owned: u64,
         total_spent: u64,
         free_voted_names: vector<u64>, // Names user has used free vote on
+        suggestions_count: u64, // Number of names user has suggested
     }
 
     /// Voting system resource
@@ -61,6 +66,7 @@ module geomi_mascot_voting::voting {
     }
 
     /// Events
+    #[event]
     struct NameSuggestedEvent has drop, store {
         id: u64,
         name: String,
@@ -68,6 +74,7 @@ module geomi_mascot_voting::voting {
         timestamp: u64,
     }
 
+    #[event]
     struct VoteCastEvent has drop, store {
         suggestion_id: u64,
         voter: address,
@@ -75,6 +82,7 @@ module geomi_mascot_voting::voting {
         timestamp: u64,
     }
 
+    #[event]
     struct VotePackPurchasedEvent has drop, store {
         buyer: address,
         pack_type: String,
@@ -111,10 +119,11 @@ module geomi_mascot_voting::voting {
         let user_exists = vector::contains(&voting_system.user_addresses, &user_addr);
         if (!user_exists) {
             let user_account = UserAccount {
-                free_votes_remaining: 1, // Each user gets 1 free vote
-                paid_votes_owned: 0,
+                free_votes_remaining: 3, // Each user gets 3 free votes
+                boost_votes_owned: 0,
                 total_spent: 0,
                 free_voted_names: vector::empty<u64>(),
+                suggestions_count: 0, // No suggestions made yet
             };
             
             vector::push_back(&mut voting_system.users, user_account);
@@ -143,16 +152,16 @@ module geomi_mascot_voting::voting {
         let user_index = get_user_index(user_addr, voting_system);
         let user_account = vector::borrow_mut(&mut voting_system.users, user_index);
         
-        // Check if user has free votes
-        assert!(user_account.free_votes_remaining > 0, E_INSUFFICIENT_PAYMENT);
+        // Check if user has reached max suggestions
+        assert!(user_account.suggestions_count < MAX_SUGGESTIONS_PER_USER, E_MAX_SUGGESTIONS_REACHED);
         
-        // Create suggestion
+        // Create suggestion (starts with 0 votes)
         let suggestion = NameSuggestion {
             id: voting_system.next_suggestion_id,
             name,
-            free_votes: 1,
-            paid_votes: 0,
-            total_votes: 1,
+            free_votes: 0,
+            boost_votes: 0,
+            total_votes: 0,
             submitted_by: user_addr,
             timestamp: timestamp::now_seconds(),
         };
@@ -160,9 +169,8 @@ module geomi_mascot_voting::voting {
         vector::push_back(&mut voting_system.suggestions, suggestion);
         voting_system.next_suggestion_id = voting_system.next_suggestion_id + 1;
         
-        // Update user account
-        user_account.free_votes_remaining = user_account.free_votes_remaining - 1;
-        vector::push_back(&mut user_account.free_voted_names, suggestion.id);
+        // Update user account - increment suggestions count
+        user_account.suggestions_count = user_account.suggestions_count + 1;
         
         // Emit event
         event::emit(NameSuggestedEvent {
@@ -173,8 +181,8 @@ module geomi_mascot_voting::voting {
         });
     }
 
-    /// Cast a vote (free or paid)
-    public fun cast_vote(user: &signer, suggestion_id: u64, is_paid_vote: bool) acquires VotingSystem {
+    /// Cast a vote (free or boost)
+    public fun cast_vote(user: &signer, suggestion_id: u64, is_boost_vote: bool) acquires VotingSystem {
         let user_addr = signer::address_of(user);
         let voting_system = borrow_global_mut<VotingSystem>(@geomi_mascot_voting);
         
@@ -185,10 +193,10 @@ module geomi_mascot_voting::voting {
         let user_index = get_user_index(user_addr, voting_system);
         let user_account = vector::borrow_mut(&mut voting_system.users, user_index);
         
-        if (is_paid_vote) {
-            // For paid votes, just check if user has paid votes available
-            assert!(user_account.paid_votes_owned > 0, E_INSUFFICIENT_PAYMENT);
-            user_account.paid_votes_owned = user_account.paid_votes_owned - 1;
+        if (is_boost_vote) {
+            // For boost votes, just check if user has boost votes available
+            assert!(user_account.boost_votes_owned > 0, E_INSUFFICIENT_PAYMENT);
+            user_account.boost_votes_owned = user_account.boost_votes_owned - 1;
         } else {
             // For free votes, check if user has free votes and hasn't used free vote on this name
             assert!(user_account.free_votes_remaining > 0, E_INSUFFICIENT_PAYMENT);
@@ -201,8 +209,8 @@ module geomi_mascot_voting::voting {
         let suggestion_index = get_suggestion_index(suggestion_id, voting_system);
         let suggestion = vector::borrow_mut(&mut voting_system.suggestions, suggestion_index);
         
-        if (is_paid_vote) {
-            suggestion.paid_votes = suggestion.paid_votes + 1;
+        if (is_boost_vote) {
+            suggestion.boost_votes = suggestion.boost_votes + 1;
         } else {
             suggestion.free_votes = suggestion.free_votes + 1;
         };
@@ -212,7 +220,7 @@ module geomi_mascot_voting::voting {
         event::emit(VoteCastEvent {
             suggestion_id,
             voter: user_addr,
-            is_paid_vote,
+            is_paid_vote: is_boost_vote,
             timestamp: timestamp::now_seconds(),
         });
     }
@@ -249,7 +257,7 @@ module geomi_mascot_voting::voting {
         let user_account = vector::borrow_mut(&mut voting_system.users, user_index);
         
         // Update user account
-        user_account.paid_votes_owned = user_account.paid_votes_owned + votes_to_add;
+        user_account.boost_votes_owned = user_account.boost_votes_owned + votes_to_add;
         user_account.total_spent = user_account.total_spent + payment_amount;
         
         // Emit event
@@ -289,7 +297,6 @@ module geomi_mascot_voting::voting {
         abort E_NAME_NOT_FOUND
     }
 
-    /// View functions
     #[view]
     public fun get_suggestions(): vector<NameSuggestion> acquires VotingSystem {
         let voting_system = borrow_global<VotingSystem>(@geomi_mascot_voting);
