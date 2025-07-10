@@ -81,7 +81,6 @@ const nextConfig = {
     return config;
   },
   // Disable static optimization to prevent SSR issues with wallet components
-  trailingSlash: false,
   generateEtags: false,
   // Disable static optimization
   generateBuildId: async () => {

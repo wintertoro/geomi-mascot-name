@@ -3,7 +3,7 @@
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { useState, useEffect } from "react";
 
-export const WalletConnection = () => {
+const WalletConnection = () => {
   const [isClient, setIsClient] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   
@@ -105,4 +105,6 @@ export const WalletConnection = () => {
       )}
     </div>
   );
-}; 
+};
+
+export default WalletConnection;

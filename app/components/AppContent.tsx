@@ -7,7 +7,7 @@ import { blockchainService } from '../services/blockchain';
 
 // Dynamically import WalletConnection to prevent SSR issues
 const WalletConnection = dynamic(
-  () => import('./WalletConnection').then(mod => ({ default: mod.WalletConnection })),
+  () => import('./WalletConnection'),
   { 
     ssr: false,
     loading: () => (
