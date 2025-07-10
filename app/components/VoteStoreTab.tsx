@@ -9,10 +9,10 @@ interface VoteStoreTabProps {
 }
 
 const VOTE_PACKS: VotePack[] = [
-  { id: 'starter', name: 'Starter Pack', votes: 5, price: 5, aptPrice: 5 },
-  { id: 'booster', name: 'Booster Pack', votes: 12, price: 10, aptPrice: 10, popular: true },
-  { id: 'power', name: 'Power Pack', votes: 25, price: 20, aptPrice: 20 },
-  { id: 'champion', name: 'Champion Pack', votes: 60, price: 45, aptPrice: 45 },
+  { id: 'basic', name: 'Basic Pack', votes: 10, price: 0.1, aptPrice: 0.1 },
+  { id: 'standard', name: 'Standard Pack', votes: 10, price: 0.1, aptPrice: 0.1, popular: true },
+  { id: 'premium', name: 'Premium Pack', votes: 10, price: 0.1, aptPrice: 0.1 },
+  { id: 'ultimate', name: 'Ultimate Pack', votes: 10, price: 0.1, aptPrice: 0.1 },
 ];
 
 export const VoteStoreTab = ({
@@ -23,7 +23,7 @@ export const VoteStoreTab = ({
 }: VoteStoreTabProps) => (
   <div className="max-w-4xl mx-auto">
     <div className="text-center mb-8">
-      <h1 className="text-3xl font-bold mb-4 text-neutral-950">Vote Store</h1>
+      <h1 className="text-3xl font-bold mb-4 text-neutral-950">Buy Votes</h1>
       <p className="text-lg text-neutral-950/80">Purchase vote packs to support your favorite names</p>
     </div>
 
@@ -32,17 +32,17 @@ export const VoteStoreTab = ({
       <div className="text-center">
         <h3 className="text-xl font-bold mb-4 text-neutral-950">Your Account</h3>
         <div className="grid md:grid-cols-3 gap-4">
-          <div className="text-center bg-blaze-600/10 rounded-lg p-4 border border-blaze-600/20">
-            <div className="text-2xl font-bold text-blaze-600">{accountBalance.toFixed(2)} APT</div>
-            <div className="text-sm text-neutral-950/60 font-mono">Available Balance</div>
+          <div className="text-center bg-black/5 rounded-lg p-4 border border-black/10">
+            <div className="text-2xl font-bold text-black">{accountBalance.toFixed(2)} APT</div>
+            <div className="text-sm text-black/60">Available Balance</div>
           </div>
-          <div className="text-center bg-sky-blue-500/10 rounded-lg p-4 border border-sky-blue-500/20">
-            <div className="text-lg font-bold text-sky-blue-600">{connected ? 'Connected' : 'Not Connected'}</div>
-            <div className="text-sm text-neutral-950/60 font-mono">Wallet Status</div>
+          <div className="text-center bg-black/5 rounded-lg p-4 border border-black/10">
+            <div className="text-lg font-bold text-black">{connected ? 'Connected' : 'Not Connected'}</div>
+            <div className="text-sm text-black/60">Wallet Status</div>
           </div>
-          <div className="text-center bg-olive-500/10 rounded-lg p-4 border border-olive-500/20">
-            <div className="text-lg font-bold text-olive-500">{isRegistered ? 'Registered' : 'Not Registered'}</div>
-            <div className="text-sm text-neutral-950/60 font-mono">Account Status</div>
+          <div className="text-center bg-black/5 rounded-lg p-4 border border-black/10">
+            <div className="text-lg font-bold text-black">{isRegistered ? 'Registered' : 'Not Registered'}</div>
+            <div className="text-sm text-black/60">Account Status</div>
           </div>
         </div>
       </div>
@@ -64,7 +64,7 @@ export const VoteStoreTab = ({
         <div>
           <h4 className="font-bold mb-2 text-neutral-950">Value & Benefits</h4>
           <ul className="text-sm space-y-1 text-neutral-950/80">
-            <li>• <strong>Best Value:</strong> Larger packs = better price per vote</li>
+            <li>• <strong>Fair Price:</strong> All packs cost 0.1 APT for 10 votes</li>
             <li>• <strong>Support Names:</strong> Help your favorites win</li>
             <li>• <strong>Win Prizes:</strong> Winner takes the entire prize pool</li>
             <li>• <strong>On-Chain:</strong> All votes are permanently recorded</li>
@@ -81,25 +81,25 @@ export const VoteStoreTab = ({
         {VOTE_PACKS.map((pack) => (
           <div key={pack.id} className="suggestion-card text-center">
             {pack.popular && (
-              <div className="status-badge active mb-4 text-xs inline-block">
+              <div className="bg-black text-white px-2 py-1 rounded text-xs mb-4 inline-block">
                 <Star size={12} className="inline mr-1" />
                 MOST POPULAR
               </div>
             )}
             
             <div className="mb-4">
-              <Coins size={32} className="mx-auto mb-2 text-blaze-600" />
+              <Coins size={32} className="mx-auto mb-2 text-black" />
               <h4 className="font-bold text-lg text-neutral-950">{pack.name}</h4>
             </div>
             
             <div className="mb-4">
-              <div className="text-3xl font-bold text-blaze-600">{pack.votes}</div>
-              <div className="text-sm text-neutral-950/60 font-mono">votes</div>
+              <div className="text-3xl font-bold text-black">{pack.votes}</div>
+              <div className="text-sm text-neutral-950/60">votes</div>
             </div>
             
             <div className="mb-4">
               <div className="text-2xl font-bold text-neutral-950">{pack.aptPrice ?? pack.price} APT</div>
-              <div className="text-xs text-neutral-950/40 font-mono">
+              <div className="text-xs text-neutral-950/40">
                 {((pack.aptPrice ?? pack.price) / pack.votes).toFixed(3)} APT per vote
               </div>
             </div>
@@ -107,7 +107,7 @@ export const VoteStoreTab = ({
             <button
               onClick={() => handlePurchase(pack)}
               disabled={!connected || !isRegistered || accountBalance < (pack.aptPrice ?? pack.price)}
-              className="w-full glass-button primary disabled:opacity-50"
+              className="w-full bg-black text-white border border-black px-4 py-2 rounded hover:bg-white hover:text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {!connected ? 'Connect Wallet' :
                !isRegistered ? 'Register First' :
@@ -126,8 +126,8 @@ export const VoteStoreTab = ({
         <div>
           <h4 className="font-bold mb-2 text-neutral-950">What happens when you buy:</h4>
           <ul className="space-y-1 text-neutral-950/80">
-            <li>• APT is deducted from your wallet</li>
-            <li>• Vote credits are added to your account</li>
+            <li>• 0.1 APT is deducted from your wallet</li>
+            <li>• 10 vote credits are added to your account</li>
             <li>• Purchase amount goes to prize pool</li>
             <li>• Transaction is recorded on Aptos blockchain</li>
           </ul>
@@ -137,7 +137,7 @@ export const VoteStoreTab = ({
           <ul className="space-y-1 text-neutral-950/80">
             <li>• Connected Aptos wallet</li>
             <li>• Registered account</li>
-            <li>• Sufficient APT balance</li>
+            <li>• At least 0.1 APT balance</li>
             <li>• Network fees for transaction</li>
           </ul>
         </div>
