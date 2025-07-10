@@ -1,31 +1,24 @@
-'use client';
-
-import { useState, useEffect } from 'react';
+import nextDynamic from 'next/dynamic';
 
 // Force dynamic rendering - prevent static generation
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
 
-export default function App() {
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  // Don't render anything during SSR
-  if (!isClient) {
-    return (
+// Import AppContent as a dynamic component to prevent SSR issues
+const AppContent = nextDynamic(
+  () => import('./components/AppContent'),
+  { 
+    ssr: false,
+    loading: () => (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-black">Loading application...</p>
         </div>
       </div>
-    );
+    )
   }
+);
 
-  // Import AppContent only on client-side
-  const AppContent = require('./components/AppContent').default;
+export default function Page() {
   return <AppContent />;
 }
