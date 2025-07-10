@@ -6,9 +6,6 @@ import {
   Trophy, 
   BookOpen, 
   Star, 
-  Crown, 
-  Target,
-  CheckCircle,
   Coins
 } from './components/Icons';
 import { GitHubLink } from './components/GitHubLink';
