@@ -7,22 +7,15 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'main' | 'leaderboard' | 'my-suggestions' | 'store' | 'instructions'>('main');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-white">
+      <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-700 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-              🎭
-            </div>
-            <div>
-              <h1 className="text-4xl font-bold mb-2 text-gray-900">Name Geomi&apos;s Mascot!</h1>
-              <p className="text-lg text-gray-600">Help choose the perfect name for our beloved mascot</p>
-            </div>
-          </div>
+        <div className="text-center mb-8 border-b border-black pb-6">
+          <h1 className="text-3xl font-bold mb-2 text-black">Name Geomi&apos;s Mascot</h1>
+          <p className="text-black">Help choose the perfect name for our mascot</p>
         </div>
 
-        {/* Test Tab Navigation */}
+        {/* Tab Navigation */}
         <div className="flex flex-wrap justify-center gap-2 mb-8">
           {[
             { id: 'main', label: 'Suggest Names' },
@@ -34,10 +27,10 @@ export default function App() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              className={`px-4 py-2 border border-black font-medium ${
                 activeTab === tab.id 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-white text-gray-700 hover:bg-gray-100'
+                  ? 'bg-black text-white' 
+                  : 'bg-white text-black hover:bg-gray-100'
               }`}
             >
               {tab.label}
@@ -46,20 +39,20 @@ export default function App() {
         </div>
 
         {/* Tab Content */}
-        <div className="bg-white rounded-lg shadow-lg p-6 max-w-4xl mx-auto">
+        <div className="border border-black p-6">
           {activeTab === 'main' && (
             <div>
-              <h2 className="text-2xl font-bold mb-4">Suggest a Name</h2>
-              <p className="text-gray-600 mb-6">
+              <h2 className="text-2xl font-bold mb-4 text-black">Suggest a Name</h2>
+              <p className="text-black mb-6">
                 Help us choose the perfect name for our beloved mascot. You can suggest up to 10 names!
               </p>
               <div className="space-y-4">
                 <input
                   type="text"
                   placeholder="Enter a creative name..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-black focus:outline-none"
                 />
-                <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                <button className="w-full bg-black text-white py-2 px-4 hover:bg-gray-800">
                   Submit Name
                 </button>
               </div>
@@ -68,37 +61,83 @@ export default function App() {
 
           {activeTab === 'leaderboard' && (
             <div>
-              <h2 className="text-2xl font-bold mb-4">Leaderboard</h2>
-              <p className="text-gray-600">Vote for your favorite names and see which ones are winning!</p>
+              <h2 className="text-2xl font-bold mb-4 text-black">Leaderboard</h2>
+              <p className="text-black">Vote for your favorite names and see which ones are winning!</p>
+              <div className="mt-6 space-y-2">
+                <div className="border border-black p-3">
+                  <div className="flex justify-between">
+                    <span className="font-medium">Sample Name 1</span>
+                    <span>42 votes</span>
+                  </div>
+                </div>
+                <div className="border border-black p-3">
+                  <div className="flex justify-between">
+                    <span className="font-medium">Sample Name 2</span>
+                    <span>38 votes</span>
+                  </div>
+                </div>
+                <div className="border border-black p-3">
+                  <div className="flex justify-between">
+                    <span className="font-medium">Sample Name 3</span>
+                    <span>35 votes</span>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
           {activeTab === 'my-suggestions' && (
             <div>
-              <h2 className="text-2xl font-bold mb-4">My Suggestions</h2>
-              <p className="text-gray-600">
+              <h2 className="text-2xl font-bold mb-4 text-black">My Suggestions</h2>
+              <p className="text-black mb-4">
                 Track your suggested names and their performance. You can suggest up to 10 names total.
               </p>
-              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-500">Connect your wallet to view your suggestions.</p>
+              <div className="border border-black p-4">
+                <p className="text-black">Connect your wallet to view your suggestions.</p>
               </div>
             </div>
           )}
 
           {activeTab === 'store' && (
             <div>
-              <h2 className="text-2xl font-bold mb-4">Vote Store</h2>
-              <p className="text-gray-600">Purchase vote packs to support your favorite names</p>
+              <h2 className="text-2xl font-bold mb-4 text-black">Vote Store</h2>
+              <p className="text-black mb-6">Purchase vote packs to support your favorite names</p>
+              <div className="space-y-4">
+                <div className="border border-black p-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="font-bold">5 Vote Pack</h3>
+                      <p className="text-sm">5 additional votes</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold">1.0 APT</p>
+                      <button className="bg-black text-white px-3 py-1 text-sm">Buy</button>
+                    </div>
+                  </div>
+                </div>
+                <div className="border border-black p-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="font-bold">10 Vote Pack</h3>
+                      <p className="text-sm">10 additional votes</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold">1.8 APT</p>
+                      <button className="bg-black text-white px-3 py-1 text-sm">Buy</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
           {activeTab === 'instructions' && (
             <div>
-              <h2 className="text-2xl font-bold mb-4">How to Vote</h2>
-              <div className="space-y-4">
+              <h2 className="text-2xl font-bold mb-4 text-black">How to Vote</h2>
+              <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-semibold">🎯 Getting Started</h3>
-                  <ol className="list-decimal list-inside text-gray-600 mt-2">
+                  <h3 className="text-lg font-bold mb-2">Getting Started</h3>
+                  <ol className="list-decimal list-inside text-black space-y-1">
                     <li>Connect your Aptos wallet</li>
                     <li>Register to get your free vote</li>
                     <li>Suggest creative names (up to 10 suggestions)</li>
@@ -106,8 +145,8 @@ export default function App() {
                   </ol>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold">🗳️ Voting Rules</h3>
-                  <ul className="list-disc list-inside text-gray-600 mt-2">
+                  <h3 className="text-lg font-bold mb-2">Voting Rules</h3>
+                  <ul className="list-disc list-inside text-black space-y-1">
                     <li>Each user gets 1 free vote per name</li>
                     <li>Purchase boost votes for additional voting power</li>
                     <li>You can vote for multiple names</li>
@@ -120,10 +159,8 @@ export default function App() {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-12 pt-8 border-t border-gray-200">
-          <p className="text-sm text-gray-500">
-            Built with ❤️ for the Geomi community
-          </p>
+        <div className="text-center mt-8 pt-6 border-t border-black">
+          <p className="text-sm text-black">Built for the Geomi community</p>
         </div>
       </div>
     </div>
