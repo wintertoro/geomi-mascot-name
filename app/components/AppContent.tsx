@@ -406,7 +406,7 @@ export default function AppContent() {
                     Most Popular
                   </div>
                   <h3 className="font-bold text-black mb-2">Standard Pack</h3>
-                  <p className="text-black mb-2">10 votes for 0.1 APT</p>
+                  <p className="text-black mb-2">25 votes for 0.3 APT</p>
                   <p className="text-xs text-black/60 mb-3">Popular choice</p>
                   <button type="button" className="w-full px-4 py-2 bg-black text-white hover:bg-gray-800">
                     Buy Standard Pack
@@ -414,7 +414,7 @@ export default function AppContent() {
                 </div>
                 <div className="border border-black p-4">
                   <h3 className="font-bold text-black mb-2">Premium Pack</h3>
-                  <p className="text-black mb-2">10 votes for 0.1 APT</p>
+                  <p className="text-black mb-2">50 votes for 0.6 APT</p>
                   <p className="text-xs text-black/60 mb-3">Enhanced voting power</p>
                   <button type="button" className="w-full px-4 py-2 bg-black text-white hover:bg-gray-800">
                     Buy Premium Pack
@@ -422,7 +422,7 @@ export default function AppContent() {
                 </div>
                 <div className="border border-black p-4">
                   <h3 className="font-bold text-black mb-2">Ultimate Pack</h3>
-                  <p className="text-black mb-2">10 votes for 0.1 APT</p>
+                  <p className="text-black mb-2">100 votes for 1.0 APT</p>
                   <p className="text-xs text-black/60 mb-3">Maximum impact</p>
                   <button type="button" className="w-full px-4 py-2 bg-black text-white hover:bg-gray-800">
                     Buy Ultimate Pack

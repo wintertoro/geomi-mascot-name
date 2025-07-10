@@ -42,10 +42,10 @@ export interface VotePack {
 }
 
 export const VOTE_PACKS: VotePack[] = [
-  { id: 'starter', name: 'Starter Pack', votes: 5, price: 5 },
-  { id: 'booster', name: 'Booster Pack', votes: 12, price: 10, popular: true },
-  { id: 'power', name: 'Power Pack', votes: 25, price: 20 },
-  { id: 'champion', name: 'Champion Pack', votes: 60, price: 45 },
+  { id: 'basic', name: 'Basic Pack', votes: 10, price: 0.1 },
+  { id: 'standard', name: 'Standard Pack', votes: 25, price: 0.3, popular: true },
+  { id: 'premium', name: 'Premium Pack', votes: 50, price: 0.6 },
+  { id: 'ultimate', name: 'Ultimate Pack', votes: 100, price: 1.0 },
 ];
 
 class BlockchainService {
