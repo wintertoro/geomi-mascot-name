@@ -32,6 +32,7 @@ export default function AppContent() {
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [isVoting, setIsVoting] = useState<string>(''); // Track which suggestion is being voted on
   const [voteMessage, setVoteMessage] = useState('');
+  const [isPurchasing, setIsPurchasing] = useState<string>(''); // Track which vote pack is being purchased
   
   // Wallet integration
   const { account, connected, signAndSubmitTransaction } = useWallet();
@@ -109,12 +110,27 @@ export default function AppContent() {
     setSubmitMessage('');
 
     try {
+      console.log('=== Submission Debug ===');
+      console.log('Wallet connected:', connected);
+      console.log('Account:', account?.address?.toString());
+      console.log('Suggestion:', suggestionInput.trim());
+      console.log('Contract configured:', blockchainService.isConfigured());
+      console.log('Config status:', blockchainService.getConfigurationStatus());
+      console.log('signAndSubmitTransaction available:', typeof signAndSubmitTransaction);
+      console.log('signAndSubmitTransaction function:', signAndSubmitTransaction);
+      console.log('=======================');
+
+      if (!signAndSubmitTransaction) {
+        throw new Error('Wallet transaction function is not available. Please make sure your wallet is properly connected.');
+      }
+
       const txHash = await blockchainService.suggestName(
         account.address.toString(),
         suggestionInput.trim(),
         signAndSubmitTransaction
       );
       
+      console.log('✅ Transaction successful:', txHash);
       setSubmitMessage('Suggestion submitted successfully!');
       setSuggestionInput('');
       
@@ -125,10 +141,21 @@ export default function AppContent() {
       }, 2000);
       
     } catch (error: any) {
-      console.error('Error submitting suggestion:', error);
+      console.error('=== Submission Error Debug ===');
+      console.error('Full error object:', error);
+      console.error('Error message:', error?.message);
+      console.error('Error code:', error?.code);
+      console.error('Error stack:', error?.stack);
+      console.error('Error string representation:', String(error));
+      console.error('Error JSON representation:', JSON.stringify(error, null, 2));
+      console.error('==============================');
+      
       let errorMessage = 'Failed to submit suggestion';
       
-      if (error.message) {
+      // Handle the specific error about 'in' operator
+      if (String(error).includes("Cannot use 'in' operator to search for 'function' in undefined")) {
+        errorMessage = 'Wallet connection issue. Please disconnect and reconnect your wallet, then try again.';
+      } else if (error?.message) {
         if (error.message.includes('E_DUPLICATE_NAME')) {
           errorMessage = 'This name has already been suggested';
         } else if (error.message.includes('E_MAX_SUGGESTIONS_REACHED')) {
@@ -137,7 +164,21 @@ export default function AppContent() {
           errorMessage = 'Voting period has ended';
         } else if (error.message.includes('Contract address')) {
           errorMessage = 'Contract not configured. Please check the setup.';
+        } else if (error.message.includes('insufficient funds') || error.message.includes('INSUFFICIENT_BALANCE')) {
+          errorMessage = 'Insufficient APT balance for transaction fees';
+        } else if (error.message.includes('rejected') || error.message.includes('denied')) {
+          errorMessage = 'Transaction was rejected by user';
+        } else if (error.message.includes('network') || error.message.includes('timeout')) {
+          errorMessage = 'Network error. Please check your connection and try again.';
+        } else if (error.message.includes('WalletCore is not initialized')) {
+          errorMessage = 'Wallet initialization error. Please disconnect and reconnect your wallet.';
+        } else {
+          // Show the actual error message for debugging
+          errorMessage = `Error: ${error.message}`;
         }
+      } else {
+        // If no message, show the string representation
+        errorMessage = `Error: ${String(error)}`;
       }
       
       setSubmitMessage(errorMessage);
@@ -161,6 +202,10 @@ export default function AppContent() {
     setVoteMessage('');
 
     try {
+      if (!signAndSubmitTransaction) {
+        throw new Error('Wallet transaction function is not available. Please make sure your wallet is properly connected.');
+      }
+
       const txHash = await blockchainService.castVote(
         account.address.toString(),
         parseInt(suggestionId),
@@ -198,32 +243,77 @@ export default function AppContent() {
     }
   };
 
+  const handlePurchaseVotePack = async (packType: string, aptAmount: number) => {
+    if (!connected || !account) {
+      setVoteMessage('Please connect your wallet first');
+      return;
+    }
+
+    setIsPurchasing(packType);
+    setVoteMessage('');
+
+    try {
+      if (!signAndSubmitTransaction) {
+        throw new Error('Wallet transaction function is not available. Please make sure your wallet is properly connected.');
+      }
+
+      const txHash = await blockchainService.purchaseVotePack(
+        account.address.toString(),
+        packType,
+        aptAmount,
+        signAndSubmitTransaction
+      );
+      
+      setVoteMessage(`Vote pack purchased successfully!`);
+      
+      // Reload user data after successful purchase
+      setTimeout(() => {
+        loadUserData();
+      }, 2000);
+      
+    } catch (error: any) {
+      console.error('Error purchasing vote pack:', error);
+      let errorMessage = 'Failed to purchase vote pack';
+      
+      if (error.message) {
+        if (error.message.includes('E_INSUFFICIENT_FUNDS')) {
+          errorMessage = 'Insufficient APT balance';
+        } else if (error.message.includes('E_VOTING_ENDED')) {
+          errorMessage = 'Voting period has ended';
+        } else if (error.message.includes('Contract address')) {
+          errorMessage = 'Contract not configured. Please check the setup.';
+        }
+      }
+      
+      setVoteMessage(errorMessage);
+    } finally {
+      setIsPurchasing('');
+    }
+  };
+
   const getSortedSuggestions = () => {
     return [...suggestions].sort((a, b) => b.totalVotes - a.totalVotes);
   };
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-4xl mx-auto px-4 py-8 relative">
-        {/* Top Right Wallet Connection */}
-        <div className="absolute top-4 right-4">
+      {/* Full-width Header */}
+      <header className="w-full bg-white border-b border-black relative">
+        {/* Top Right Corner Wallet Connection */}
+        <div className="absolute top-4 right-4 z-10">
           <WalletConnection />
         </div>
         
-        {/* Header */}
-        <div className="text-center mb-8 border-b border-black pb-6">
-          <h1 className="text-3xl font-bold mb-2 text-black">Name Geomi&apos;s Mascot</h1>
-          <p className="text-black">Help choose the perfect name for our mascot</p>
-          
-          {/* Configuration Status */}
-          <div className="mt-4 text-xs text-center">
-            {blockchainService.isConfigured() ? (
-              <span className="text-green-600">✅ Blockchain service connected</span>
-            ) : (
-              <span className="text-red-600">❌ Blockchain service not configured</span>
-            )}
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold mb-2 text-black">Name Geomi&apos;s Mascot</h1>
+            <p className="text-black">Help choose the perfect name for our mascot</p>
           </div>
         </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="max-w-4xl mx-auto px-4 py-8">
 
         {/* Tab Navigation */}
         <div className="flex flex-wrap justify-center gap-2 mb-8">
@@ -397,8 +487,8 @@ export default function AppContent() {
                   <h3 className="font-bold text-black mb-2">Basic Pack</h3>
                   <p className="text-black mb-2">10 votes for 0.1 APT</p>
                   <p className="text-xs text-black/60 mb-3">Great for getting started</p>
-                  <button type="button" className="w-full px-4 py-2 bg-black text-white hover:bg-gray-800">
-                    Buy Basic Pack
+                  <button type="button" className="w-full px-4 py-2 bg-black text-white hover:bg-gray-800 disabled:opacity-50" onClick={() => handlePurchaseVotePack('basic', 0.1)} disabled={isPurchasing === 'basic' || !connected}>
+                    {isPurchasing === 'basic' ? 'Purchasing...' : 'Buy Basic Pack'}
                   </button>
                 </div>
                 <div className="border border-black p-4 relative">
@@ -408,24 +498,24 @@ export default function AppContent() {
                   <h3 className="font-bold text-black mb-2">Standard Pack</h3>
                   <p className="text-black mb-2">25 votes for 0.3 APT</p>
                   <p className="text-xs text-black/60 mb-3">Popular choice</p>
-                  <button type="button" className="w-full px-4 py-2 bg-black text-white hover:bg-gray-800">
-                    Buy Standard Pack
+                  <button type="button" className="w-full px-4 py-2 bg-black text-white hover:bg-gray-800 disabled:opacity-50" onClick={() => handlePurchaseVotePack('standard', 0.3)} disabled={isPurchasing === 'standard' || !connected}>
+                    {isPurchasing === 'standard' ? 'Purchasing...' : 'Buy Standard Pack'}
                   </button>
                 </div>
                 <div className="border border-black p-4">
                   <h3 className="font-bold text-black mb-2">Premium Pack</h3>
                   <p className="text-black mb-2">50 votes for 0.6 APT</p>
                   <p className="text-xs text-black/60 mb-3">Enhanced voting power</p>
-                  <button type="button" className="w-full px-4 py-2 bg-black text-white hover:bg-gray-800">
-                    Buy Premium Pack
+                  <button type="button" className="w-full px-4 py-2 bg-black text-white hover:bg-gray-800 disabled:opacity-50" onClick={() => handlePurchaseVotePack('premium', 0.6)} disabled={isPurchasing === 'premium' || !connected}>
+                    {isPurchasing === 'premium' ? 'Purchasing...' : 'Buy Premium Pack'}
                   </button>
                 </div>
                 <div className="border border-black p-4">
                   <h3 className="font-bold text-black mb-2">Ultimate Pack</h3>
                   <p className="text-black mb-2">100 votes for 1.0 APT</p>
                   <p className="text-xs text-black/60 mb-3">Maximum impact</p>
-                  <button type="button" className="w-full px-4 py-2 bg-black text-white hover:bg-gray-800">
-                    Buy Ultimate Pack
+                  <button type="button" className="w-full px-4 py-2 bg-black text-white hover:bg-gray-800 disabled:opacity-50" onClick={() => handlePurchaseVotePack('ultimate', 1.0)} disabled={isPurchasing === 'ultimate' || !connected}>
+                    {isPurchasing === 'ultimate' ? 'Purchasing...' : 'Buy Ultimate Pack'}
                   </button>
                 </div>
               </div>

@@ -56,22 +56,15 @@ class BlockchainService {
     const config = new AptosConfig({ network: Network.TESTNET });
     this.aptos = new Aptos(config);
     
-    // Debug logging
-    console.log('Environment check:', {
-      NODE_ENV: process.env.NODE_ENV,
-      NEXT_PUBLIC_CONTRACT_ADDRESS: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
-      typeof_window: typeof window,
-      all_env_vars: Object.keys(process.env).filter(key => key.startsWith('NEXT_PUBLIC_'))
-    });
-    
     // Validate contract address
     this.contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "";
+    
     if (!this.contractAddress) {
-      console.error('NEXT_PUBLIC_CONTRACT_ADDRESS environment variable is not set');
+      console.error('❌ NEXT_PUBLIC_CONTRACT_ADDRESS environment variable is not set');
       console.error('Available NEXT_PUBLIC_ variables:', Object.keys(process.env).filter(key => key.startsWith('NEXT_PUBLIC_')));
       // In development, we can continue but all blockchain calls will fail gracefully
     } else {
-      console.log('Contract address loaded successfully:', this.contractAddress);
+      console.log('✅ Contract address loaded successfully:', this.contractAddress);
     }
   }
 
@@ -149,16 +142,41 @@ class BlockchainService {
       throw new Error(`Contract not configured. ${configStatus.error} Current environment: ${process.env.NODE_ENV}`);
     }
 
-    const transaction = await this.aptos.transaction.build.simple({
-      sender: userAddress,
-      data: {
-        function: `${this.contractAddress}::geomi_voting::suggest_name`,
-        functionArguments: [new MoveString(name)],
-      },
-    });
+    try {
+      console.log('🔨 Building transaction...');
+      console.log('Contract address:', this.contractAddress);
+      console.log('User address:', userAddress);
+      console.log('Name:', name);
 
-    const committedTransaction = await signAndSubmitTransaction(transaction);
-    return committedTransaction.hash;
+      const transaction = await this.aptos.transaction.build.simple({
+        sender: userAddress,
+        data: {
+          function: `${this.contractAddress}::geomi_voting::suggest_name`,
+          functionArguments: [new MoveString(name)],
+        },
+      });
+
+      console.log('✅ Transaction built successfully');
+      console.log('Transaction object:', transaction);
+      console.log('Transaction type:', typeof transaction);
+      console.log('Transaction keys:', Object.keys(transaction));
+      
+      console.log('🚀 Submitting transaction...');
+      const committedTransaction = await signAndSubmitTransaction(transaction);
+      
+      console.log('✅ Transaction submitted successfully');
+      console.log('Committed transaction:', committedTransaction);
+      
+      return committedTransaction.hash;
+    } catch (error: any) {
+      console.error('❌ Error in suggestName function:');
+      console.error('Error type:', typeof error);
+      console.error('Error instanceof Error:', error instanceof Error);
+      console.error('Error message:', error?.message);
+      console.error('Error stack:', error?.stack);
+      console.error('Full error object:', error);
+      throw error;
+    }
   }
 
   // Cast a vote
